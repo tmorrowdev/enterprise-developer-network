@@ -1,0 +1,76 @@
+{
+  "code_standards": {
+    "javascript": {
+      "eslint_rules": {
+        "max_line_length": 100,
+        "no_console_log": "error",
+        "prefer_const": "error",
+        "no_var": "error"
+      },
+      "security_rules": {
+        "no_hardcoded_secrets": "error",
+        "validate_user_input": "warning",
+        "use_https_only": "error"
+      }
+    }
+  },
+  "design_system": {
+    "components": [
+      {
+        "name": "Button",
+        "variants": ["primary", "secondary", "danger", "ghost"],
+        "props": ["size", "disabled", "loading", "icon"],
+        "usage_frequency": 245
+      },
+      {
+        "name": "Input",
+        "variants": ["text", "email", "password", "search"],
+        "props": ["placeholder", "required", "validation", "helperText"],
+        "usage_frequency": 189
+      }
+    ],
+    "design_tokens": {
+      "colors": {
+        "primary": "#2563eb",
+        "secondary": "#64748b",
+        "success": "#10b981"
+      }
+    }
+  },
+  "developer_profiles": [
+    {
+      "id": "dev_001",
+      "name": "Sarah Chen",
+      "productivity_metrics": {
+        "commits_per_week": 18,
+        "code_review_participation": 85,
+        "feature_completion_rate": 92
+      },
+      "skill_levels": {
+        "react": 9,
+        "typescript": 8
+      },
+      "learning_recommendations": ["Advanced Testing Patterns"]
+    },
+    {
+      "id": "dev_002",
+      "name": "Marcus Rodriguez",
+      "productivity_metrics": {
+        "commits_per_week": 8,
+        "code_review_participation": 45,
+        "feature_completion_rate": 67
+      },
+      "recent_struggles": ["Async/await patterns", "Component state management"],
+      "learning_recommendations": ["React State Management Fundamentals"]
+    }
+  ],
+  "learning_paths": [
+    {
+      "id": "react_fundamentals",
+      "title": "React Fundamentals",
+      "difficulty": "beginner",
+      "estimated_hours": 20,
+      "modules": ["Components and JSX", "Props and State"]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "dashboard/server.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "dashboard/server.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "dashboard/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

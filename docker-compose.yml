@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  enterprise-mcp-demo:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./data:/app/data:ro
+    restart: unless-stopped
+
+  demo-runner:
+    build: .
+    command: ["node", "demo/run-demo.js"]
+    depends_on:
+      - enterprise-mcp-demo
+    profiles:
+      - demo
