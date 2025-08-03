@@ -1,44 +1,129 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Developer Support Dashboard</title>
+    <title>Enterprise Developer Network - Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="module" src="https://unpkg.com/@cre8_dev/cre8-wc@latest/dist/cre8-wc.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .metric { font-size: 2em; font-weight: bold; color: #0066cc; }
-        .chart { height: 200px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 24px;
+            background: #1a1a1a;
+            color: #e5e5e5;
+            min-height: 100vh;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #404040;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        .metric-card {
+            background: #262626;
+            border: 1px solid #404040;
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.2s ease;
+        }
+        .metric-card:hover {
+            border-color: #2563eb;
+            transform: translateY(-2px);
+        }
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 16px 0;
+        }
+        .metric-label {
+            color: #a3a3a3;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .developer-section {
+            margin-top: 32px;
+        }
+        .developer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .recommendations {
+            margin-top: 16px;
+        }
+        .recommendation-item {
+            background: #404040;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 4px 0;
+            font-size: 0.875rem;
+        }
     </style>
 </head>
 <body>
-    <h1>Developer Support Dashboard</h1>
-    
+    <div class="header">
+        <div>
+            <h1 style="margin: 0; color: #60a5fa;">Enterprise Developer Network</h1>
+            <p style="margin: 8px 0 0 0; color: #a3a3a3;">Real-time developer productivity & learning analytics</p>
+        </div>
+        <cre8-button variant="primary" id="refresh-btn">
+            🔄 Refresh Data
+        </cre8-button>
+    </div>
+
     <div class="dashboard">
-        <div class="card">
-            <h3>📊 Productivity Metrics</h3>
-            <div class="metric" id="productivity">85%</div>
-            <div class="chart">Real-time productivity chart</div>
+        <div class="metric-card">
+            <div class="metric-label">📊 Team Productivity</div>
+            <div class="metric-value" id="productivity" style="color: #10b981;">85%</div>
+            <cre8-progress value="85" style="margin-top: 16px;"></cre8-progress>
+            <div style="margin-top: 8px; color: #a3a3a3; font-size: 0.875rem;">Average completion rate</div>
         </div>
         
-        <div class="card">
-            <h3>🎓 Learning Progress</h3>
-            <div class="metric" id="learning">3/5</div>
-            <div>Courses completed this month</div>
+        <div class="metric-card">
+            <div class="metric-label">🎓 Learning Progress</div>
+            <div class="metric-value" id="learning" style="color: #f59e0b;">3/5</div>
+            <cre8-progress value="60" style="margin-top: 16px;"></cre8-progress>
+            <div style="margin-top: 8px; color: #a3a3a3; font-size: 0.875rem;">Courses completed this month</div>
         </div>
         
-        <div class="card">
-            <h3>🎨 Design System Usage</h3>
-            <div class="metric" id="design">92%</div>
-            <div>Components following standards</div>
+        <div class="metric-card">
+            <div class="metric-label">🎨 Design System</div>
+            <div class="metric-value" id="design" style="color: #60a5fa;">92%</div>
+            <cre8-progress value="92" style="margin-top: 16px;"></cre8-progress>
+            <div style="margin-top: 8px; color: #a3a3a3; font-size: 0.875rem;">Components following standards</div>
         </div>
         
-        <div class="card">
-            <h3>👥 Team Collaboration</h3>
-            <div class="metric" id="collaboration">12</div>
-            <div>Code reviews completed</div>
+        <div class="metric-card">
+            <div class="metric-label">👥 Collaboration</div>
+            <div class="metric-value" id="collaboration" style="color: #3b82f6;">18</div>
+            <div style="margin-top: 16px; color: #a3a3a3; font-size: 0.875rem;">Code reviews this week</div>
         </div>
     </div>
 
+    <div class="developer-section">
+        <h2 style="color: #d4d4d8; margin-bottom: 20px;">Developer Profiles</h2>
+        <div class="developer-grid" id="developer-profiles">
+            <!-- Developer cards will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <script src="mcp-client.js"></script>
     <script src="dashboard.js"></script>
 </body>
 </html>

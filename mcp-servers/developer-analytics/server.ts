@@ -20,24 +20,32 @@ class DeveloperAnalyticsServer {
       { name: 'developer-analytics', version: '1.0.0' }
     );
     this.setupToolHandlers();
+    this.init();
+  }
+
+  private init() {
     this.loadSampleData();
   }
 
   private loadSampleData() {
-    const fs = require('fs');
-    const path = require('path');
-    const dataPath = path.join(__dirname, '../../data/enterprise-data.json');
-    const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-    
-    data.developer_profiles.forEach((dev: any) => {
-      this.metrics.set(dev.id, {
-        commits: dev.productivity_metrics.commits_per_week,
-        reviewsCompleted: dev.productivity_metrics.code_review_participation,
-        productivity: dev.productivity_metrics.feature_completion_rate,
-        struggles: dev.recent_struggles || [],
-        recommendations: dev.learning_recommendations
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const dataPath = path.join(__dirname, '../../data/enterprise-data.json');
+      const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+      
+      data.developer_profiles.forEach((dev: any) => {
+        this.metrics.set(dev.id, {
+          commits: dev.productivity_metrics.commits_per_week,
+          reviewsCompleted: dev.productivity_metrics.code_review_participation,
+          productivity: dev.productivity_metrics.feature_completion_rate,
+          struggles: dev.recent_struggles || [],
+          recommendations: dev.learning_recommendations
+        });
       });
-    });
+    } catch (error) {
+      console.error('Failed to load developer data:', error);
+    }
   }
 
   private setupToolHandlers() {

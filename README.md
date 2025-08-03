@@ -59,7 +59,7 @@ The servers are configured for Kiro in `kiro-config.json`. Each server runs inde
 - **Standardization**: Consistent code quality across teams
 - **Productivity**: Data-driven development insights
 - **Learning**: Integrated skill development tracking
-- **Design Consistency**: Unified component usage
+- **Design Consistency**: Unified component usage with cre8-wc library
 - **Efficient Onboarding**: Streamlined new hire experience
 
 ## Enterprise Data Integration
@@ -77,15 +77,46 @@ The system includes real enterprise data:
 - Security rules (no hardcoded secrets, HTTPS only)
 - Performance requirements (500kb bundle, 90+ Lighthouse score)
 
-### Design System
-- **Button** component (245 uses) - primary, secondary, danger, ghost variants
-- **Input** component (189 uses) - text, email, password, search types
+### Design System (cre8-wc Components)
+- **cre8-button** component (245 uses) - primary, secondary, tertiary variants
+- **cre8-field** component (189 uses) - text, email, password, number types
+- **cre8-card** component (156 uses) - bare, horizontal, horizontal-bare variants
 - **Design tokens** - Primary #2563eb, Success #10b981, Warning #f59e0b
 
 ### Learning Paths
 - React Fundamentals (20h, beginner)
 - Advanced Testing Patterns (35h, advanced)
 - Kubernetes Fundamentals (40h, intermediate)
+
+## cre8-wc Component Library
+
+The dashboard now uses the modern cre8-wc web component library:
+
+### Available Components
+- **cre8-button** - Interactive buttons with primary, secondary, tertiary variants
+- **cre8-card** - Container component with header, body, footer slots
+- **cre8-alert** - Status messages (info, success, warning, error)
+- **cre8-field** - Form inputs with validation and accessibility
+- **cre8-modal** - Dialog overlays with customizable sizes
+- **cre8-progress** - Progress indicators for metrics
+- **cre8-badge** - Status and label badges
+
+### Component Usage
+```html
+<!-- Button with variants -->
+<cre8-button text="Primary Action" variant="primary"></cre8-button>
+<cre8-button text="Secondary" variant="secondary"></cre8-button>
+
+<!-- Card with slots -->
+<cre8-card>
+  <div slot="header"><h3>Developer Profile</h3></div>
+  <div slot="body"><p>Performance metrics...</p></div>
+  <div slot="footer"><cre8-button text="View Details"></cre8-button></div>
+</cre8-card>
+
+<!-- Progress indicator -->
+<cre8-progress value="85"></cre8-progress>
+```
 
 ## Demo Scenarios
 
@@ -154,14 +185,19 @@ npm start
 
 ## Quick Start
 
-1. **Install dependencies**:
+1. **Migrate to cre8-wc** (if updating from Shoelace):
+```bash
+./update-to-cre8.sh
+```
+
+2. **Install dependencies**:
 ```bash
 cd mcp-servers
 npm install
 npm run build
 ```
 
-2. **Start dashboard**:
+3. **Start dashboard**:
 ```bash
 cd dashboard
 npm install
@@ -184,9 +220,14 @@ Share the demo with colleagues using multiple deployment options:
 
 ### Option 1: Docker (Recommended)
 ```bash
-./deploy.sh
-# Choose option 1 for Docker
-# Demo available at http://localhost:3000
+# Build and run with MCP server endpoints
+docker build -t enterprise-dev-network .
+docker run -d -p 3000:3000 -p 3002:3002 --name enterprise-demo enterprise-dev-network
+
+# Access points:
+# Dashboard: http://localhost:3000
+# MCP Health: http://localhost:3002/health
+# MCP Endpoints: http://localhost:3002/mcp/{server-name}
 ```
 
 ### Option 2: Railway (Cloud)
@@ -222,6 +263,9 @@ Once deployed, colleagues can access:
 - **Dashboard**: `https://your-domain.com`
 - **API Health**: `https://your-domain.com/api/health`
 - **Developer Metrics**: `https://your-domain.com/api/metrics/dev_001`
+- **MCP Server Health**: `https://your-domain.com:3002/health`
+- **MCP Code Standards**: `https://your-domain.com:3002/mcp/code-standards`
+- **MCP Design System**: `https://your-domain.com:3002/mcp/design-system`
 
 ### Sharing Instructions
 Send colleagues:
