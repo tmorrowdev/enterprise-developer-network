@@ -3,13 +3,21 @@
   "version": "1.0.0",
   "description": "MCP Server Network for Enterprise Standards",
   "scripts": {
-    "start": "cd dashboard && npm start",
+    "start": "cd mcp-servers && node dist/server.js",
     "demo": "node demo/run-demo.js",
     "build": "cd mcp-servers && npm run build",
     "deploy": "docker-compose up -d",
     "demo-docker": "docker-compose --profile demo up demo-runner"
   },
-  "keywords": ["mcp", "enterprise", "kiro", "developer-tools"],
+  "keywords": [
+    "mcp",
+    "enterprise",
+    "kiro",
+    "developer-tools"
+  ],
   "author": "Enterprise Developer Network",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@cre8_dev/cre8-wc": "^1.0.5"
+  }
 }

@@ -13,8 +13,9 @@ COPY . .
 
 RUN cd mcp-servers && npm run build
 
-EXPOSE 3000
+EXPOSE 3000 3002
 
-WORKDIR /app/dashboard
+COPY start.sh /app/
+RUN chmod +x /app/start.sh
 
-CMD ["node", "server.js"]
+CMD ["/app/start.sh"]

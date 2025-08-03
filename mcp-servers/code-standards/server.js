@@ -1,37 +1,26 @@
 #!/usr/bin/env node
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-interface StyleGuide {
-  language: string;
-  rules: Record<string, any>;
-  security?: Record<string, any>;
-  severity: 'error' | 'warning' | 'info';
-}
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class CodeStandardsServer {
-  private server: any;
-  private styleGuides: Map<string, StyleGuide> = new Map();
-
   constructor() {
-    this.server = new Server(
-      { name: 'code-standards-enforcer', version: '1.0.0' }
-    );
+    this.server = new Server({ name: 'code-standards-enforcer', version: '1.0.0' });
+    this.styleGuides = new Map();
     this.setupToolHandlers();
-    this.init();
+    this.loadDefaultStyleGuides();
   }
 
-  private async init() {
-    await this.loadDefaultStyleGuides();
-  }
-
-  private async loadDefaultStyleGuides() {
+  loadDefaultStyleGuides() {
     try {
-      const fs = await import('fs');
-      const path = await import('path');
-      const __dirname = path.dirname(new URL(import.meta.url).pathname);
-      const dataPath = path.join(__dirname, '../../../data/enterprise-data.json');
+      const dataPath = path.join(__dirname, '../../data/enterprise-data.json');
       const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
       
       this.styleGuides.set('javascript', {
@@ -45,7 +34,7 @@ class CodeStandardsServer {
     }
   }
 
-  private setupToolHandlers() {
+  setupToolHandlers() {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {
@@ -74,7 +63,7 @@ class CodeStandardsServer {
       ]
     }));
 
-    this.server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
+    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       switch (request.params.name) {
         case 'validate_code':
           return this.validateCode(request.params.arguments);
@@ -86,7 +75,7 @@ class CodeStandardsServer {
     });
   }
 
-  private async validateCode(args: any) {
+  async validateCode(args) {
     const { code, language } = args;
     const guide = this.styleGuides.get(language);
     
@@ -98,7 +87,6 @@ class CodeStandardsServer {
     if (code.includes('console.log')) violations.push('Remove console.log statements');
     if (code.includes('var ')) violations.push('Use const/let instead of var');
     if (code.includes('password') && code.includes('=')) violations.push('No hardcoded secrets');
-    if (code.length > 100 * code.split('\n').length) violations.push('Lines exceed 100 characters');
 
     return {
       content: [{
@@ -108,7 +96,7 @@ class CodeStandardsServer {
     };
   }
 
-  private async getStyleGuide(args: any) {
+  async getStyleGuide(args) {
     const { language } = args;
     const guide = this.styleGuides.get(language);
     

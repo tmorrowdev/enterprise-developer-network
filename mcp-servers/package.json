@@ -1,18 +1,21 @@
 {
   "name": "enterprise-mcp-servers",
   "version": "1.0.0",
-  "description": "MCP Server Network for Enterprise Standards",
+
   "type": "module",
+  "description": "MCP Server Network for Enterprise Standards",
   "scripts": {
     "build": "tsc",
-    "start:code-standards": "node dist/code-standards/server.js",
+    "start:code-standards": "node dist/server.js",
     "start:developer-analytics": "node dist/developer-analytics/server.js",
     "start:learning-platform": "node dist/learning-platform/server.js",
     "start:design-system": "node dist/design-system/server.js",
     "start:onboarding-assistant": "node dist/onboarding-assistant/server.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.4.0"
+    "@modelcontextprotocol/sdk": "^0.4.0",
+    "express": "^4.18.0",
+    "cors": "^2.8.5"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

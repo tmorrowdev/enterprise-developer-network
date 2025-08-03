@@ -5,6 +5,7 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "@cre8_dev/cre8-wc": "^1.0.5",
     "express": "^4.18.0"
   }
 }
