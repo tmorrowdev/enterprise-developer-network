@@ -4,11 +4,15 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = process.env.PORT || 3201;
+const PORT = process.env.PORT || 3210;
 
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dashboard-redesign.html'));
+});
+
+app.get('/classic', (req, res) => {
   res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
 
@@ -22,7 +26,7 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/mcp/health', async (req, res) => {
   try {
-    const response = await fetch('http://localhost:3002/health');
+    const response = await fetch('http://localhost:3202/health');
     const data = await response.json();
     res.json(data);
   } catch (error) {
@@ -42,7 +46,7 @@ app.post('/api/mcp/:server/:tool', async (req, res) => {
       params: { name: tool, arguments: args }
     };
     
-    const response = await fetch(`http://localhost:3002/mcp/${server}`, {
+    const response = await fetch(`http://localhost:3202/mcp/${server}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(mcpRequest)

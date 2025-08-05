@@ -1,0 +1,32 @@
+{
+  "httpServers": {
+    "enterprise-mcp-network": {
+      "baseUrl": "http://localhost:3002",
+      "endpoints": {
+        "health": "/health",
+        "codeStandards": "/mcp/code-standards", 
+        "designSystem": "/mcp/design-system",
+        "developerAnalytics": "/mcp/developer-analytics",
+        "learningPlatform": "/mcp/learning-platform",
+        "onboardingAssistant": "/mcp/onboarding-assistant"
+      },
+      "tools": {
+        "validate_code": {
+          "server": "code-standards",
+          "method": "POST",
+          "description": "Validate code against enterprise standards"
+        },
+        "get_component": {
+          "server": "design-system", 
+          "method": "POST",
+          "description": "Get cre8-wc component documentation"
+        },
+        "get_developer_metrics": {
+          "server": "developer-analytics",
+          "method": "POST", 
+          "description": "Get developer productivity metrics"
+        }
+      }
+    }
+  }
+}

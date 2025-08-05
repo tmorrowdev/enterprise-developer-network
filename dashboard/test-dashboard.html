@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Component Testing Suite</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="module" src="https://esm.sh/@cre8_dev/cre8-wc@1.0.5"></script>
+    <link href="https://esm.sh/@cre8_dev/cre8-design-tokens@1.0.3/lib/web/brands/cre8/css/tokens_cre8.css" rel="stylesheet" type="text/css"/>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        
+        .test-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 16px;
+            color: #1e293b;
+        }
+        
+        .test-result {
+            margin: 10px 0;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .test-pass {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .test-fail {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .test-component {
+            margin: 16px 0;
+            padding: 16px;
+            border: 2px dashed #e2e8f0;
+            border-radius: 8px;
+        }
+        
+        .error-log {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard Component Testing Suite</h1>
+    <div id="test-results"></div>
+    <div id="error-log" class="error-log"></div>
+
+    <script>
+        class DashboardTester {
+            constructor() {
+                this.results = [];
+                this.errors = [];
+                this.setupErrorHandling();
+            }
+
+            setupErrorHandling() {
+                window.addEventListener('error', (e) => {
+                    this.logError(`JavaScript Error: ${e.message} at ${e.filename}:${e.lineno}`);
+                });
+
+                window.addEventListener('unhandledrejection', (e) => {
+                    this.logError(`Unhandled Promise Rejection: ${e.reason}`);
+                });
+            }
+
+            logError(message) {
+                this.errors.push(message);
+                console.error(message);
+                this.updateErrorLog();
+            }
+
+            logResult(testName, passed, message = '') {
+                const result = { testName, passed, message };
+                this.results.push(result);
+                console.log(`${passed ? '✅' : '❌'} ${testName}: ${message}`);
+                this.updateResults();
+            }
+
+            updateResults() {
+                const resultsDiv = document.getElementById('test-results');
+                resultsDiv.innerHTML = this.results.map(result => `
+                    <div class="test-result ${result.passed ? 'test-pass' : 'test-fail'}">
+                        ${result.passed ? '✅' : '❌'} ${result.testName}: ${result.message}
+                    </div>
+                `).join('');
+            }
+
+            updateErrorLog() {
+                const errorLog = document.getElementById('error-log');
+                errorLog.textContent = this.errors.join('\n');
+                errorLog.style.display = this.errors.length > 0 ? 'block' : 'none';
+            }
+
+            async runTests() {
+                this.logResult('Test Suite Started', true, 'Beginning component tests...');
+
+                // Test 1: Basic component loading
+                await this.testComponentLoading();
+                
+                // Test 2: cre8-button tests
+                await this.testButton();
+                
+                // Test 3: cre8-card tests
+                await this.testCard();
+                
+                // Test 4: cre8-tabs tests
+                await this.testTabs();
+                
+                // Test 5: cre8-progress-meter tests
+                await this.testProgressMeter();
+                
+                // Test 6: cre8-badge tests
+                await this.testBadge();
+                
+                // Test 7: cre8-alert tests
+                await this.testAlert();
+                
+                // Test 8: cre8-table tests
+                await this.testTable();
+                
+                // Test 9: cre8-grid tests
+                await this.testGrid();
+                
+                // Test 10: Form components tests
+                await this.testFormComponents();
+
+                this.logResult('Test Suite Complete', true, `${this.results.filter(r => r.passed).length}/${this.results.length} tests passed, ${this.errors.length} errors found`);
+            }
+
+            async testComponentLoading() {
+                try {
+                    // Check if web components are defined
+                    const components = [
+                        'cre8-button', 'cre8-card', 'cre8-tabs', 'cre8-tab', 'cre8-tab-panel',
+                        'cre8-progress-meter', 'cre8-badge', 'cre8-alert', 'cre8-table',
+                        'cre8-grid', 'cre8-grid-item', 'cre8-field', 'cre8-dropdown',
+                        'cre8-heading', 'cre8-text-passage', 'cre8-loading-spinner'
+                    ];
+
+                    let defined = 0;
+                    let total = components.length;
+
+                    for (const componentName of components) {
+                        if (customElements.get(componentName)) {
+                            defined++;
+                        } else {
+                            this.logError(`Component not defined: ${componentName}`);
+                        }
+                    }
+
+                    this.logResult('Component Loading', defined === total, `${defined}/${total} components defined`);
+                } catch (error) {
+                    this.logError(`Component loading test failed: ${error.message}`);
+                    this.logResult('Component Loading', false, error.message);
+                }
+            }
+
+            async testButton() {
+                try {
+                    const testDiv = this.createTestSection('Button Tests');
+                    
+                    // Test basic button
+                    const button1 = document.createElement('cre8-button');
+                    button1.setAttribute('text', 'Test Button');
+                    testDiv.appendChild(button1);
+                    
+                    // Test button variants
+                    const variants = ['primary', 'secondary', 'tertiary'];
+                    for (const variant of variants) {
+                        const button = document.createElement('cre8-button');
+                        button.setAttribute('text', `${variant} Button`);
+                        button.setAttribute('variant', variant);
+                        testDiv.appendChild(button);
+                    }
+                    
+                    // Test button sizes
+                    const sizes = ['sm', 'md', 'lg'];
+                    for (const size of sizes) {
+                        const button = document.createElement('cre8-button');
+                        button.setAttribute('text', `${size} Button`);
+                        button.setAttribute('size', size);
+                        testDiv.appendChild(button);
+                    }
+                    
+                    // Test disabled button
+                    const disabledButton = document.createElement('cre8-button');
+                    disabledButton.setAttribute('text', 'Disabled Button');
+                    disabledButton.setAttribute('disabled', 'true');
+                    testDiv.appendChild(disabledButton);
+                    
+                    // Test loading button
+                    const loadingButton = document.createElement('cre8-button');
+                    loadingButton.setAttribute('text', 'Loading Button');
+                    loadingButton.setAttribute('loading', 'true');
+                    testDiv.appendChild(loadingButton);
+
+                    await this.waitForRender();
+                    this.logResult('Button Component', true, 'All button variants rendered successfully');
+                } catch (error) {
+                    this.logError(`Button test failed: ${error.message}`);
+                    this.logResult('Button Component', false, error.message);
+                }
+            }
+
+            async testCard() {
+                try {
+                    const testDiv = this.createTestSection('Card Tests');
+                    
+                    // Test basic card
+                    const card = document.createElement('cre8-card');
+                    card.innerHTML = `
+                        <div slot="header"><h3>Card Header</h3></div>
+                        <div slot="body"><p>Card body content</p></div>
+                        <div slot="footer"><button>Card Action</button></div>
+                    `;
+                    testDiv.appendChild(card);
+                    
+                    // Test card variants
+                    const variants = ['bare', 'horizontal', 'horizontal-bare'];
+                    for (const variant of variants) {
+                        const variantCard = document.createElement('cre8-card');
+                        variantCard.setAttribute('variant', variant);
+                        variantCard.innerHTML = `
+                            <div slot="body"><p>${variant} card variant</p></div>
+                        `;
+                        testDiv.appendChild(variantCard);
+                    }
+
+                    await this.waitForRender();
+                    this.logResult('Card Component', true, 'All card variants rendered successfully');
+                } catch (error) {
+                    this.logError(`Card test failed: ${error.message}`);
+                    this.logResult('Card Component', false, error.message);
+                }
+            }
+
+            async testTabs() {
+                try {
+                    const testDiv = this.createTestSection('Tabs Tests');
+                    
+                    const tabs = document.createElement('cre8-tabs');
+                    tabs.setAttribute('active-index', '0');
+                    tabs.innerHTML = `
+                        <cre8-tab slot="default">Tab 1</cre8-tab>
+                        <cre8-tab slot="default">Tab 2</cre8-tab>
+                        <cre8-tab slot="default">Tab 3</cre8-tab>
+                        
+                        <cre8-tab-panel slot="panel">
+                            <p>Content for Tab 1</p>
+                        </cre8-tab-panel>
+                        <cre8-tab-panel slot="panel">
+                            <p>Content for Tab 2</p>
+                        </cre8-tab-panel>
+                        <cre8-tab-panel slot="panel">
+                            <p>Content for Tab 3</p>
+                        </cre8-tab-panel>
+                    `;
+                    testDiv.appendChild(tabs);
+
+                    await this.waitForRender();
+                    this.logResult('Tabs Component', true, 'Tabs component rendered successfully');
+                } catch (error) {
+                    this.logError(`Tabs test failed: ${error.message}`);
+                    this.logResult('Tabs Component', false, error.message);
+                }
+            }
+
+            async testProgressMeter() {
+                try {
+                    const testDiv = this.createTestSection('Progress Meter Tests');
+                    
+                    const statuses = ['success', 'warning', 'error', 'info'];
+                    for (const status of statuses) {
+                        const progress = document.createElement('cre8-progress-meter');
+                        progress.setAttribute('label', `${status} Progress`);
+                        progress.setAttribute('value', '75');
+                        progress.setAttribute('max', '100');
+                        progress.setAttribute('status', status);
+                        testDiv.appendChild(progress);
+                    }
+
+                    await this.waitForRender();
+                    this.logResult('Progress Meter', true, 'All progress meter statuses rendered successfully');
+                } catch (error) {
+                    this.logError(`Progress meter test failed: ${error.message}`);
+                    this.logResult('Progress Meter', false, error.message);
+                }
+            }
+
+            async testBadge() {
+                try {
+                    const testDiv = this.createTestSection('Badge Tests');
+                    
+                    const statuses = ['success', 'warning', 'error', 'info'];
+                    for (const status of statuses) {
+                        const badge = document.createElement('cre8-badge');
+                        badge.setAttribute('status', status);
+                        badge.setAttribute('text', `${status} Badge`);
+                        testDiv.appendChild(badge);
+                    }
+
+                    await this.waitForRender();
+                    this.logResult('Badge Component', true, 'All badge statuses rendered successfully');
+                } catch (error) {
+                    this.logError(`Badge test failed: ${error.message}`);
+                    this.logResult('Badge Component', false, error.message);
+                }
+            }
+
+            async testAlert() {
+                try {
+                    const testDiv = this.createTestSection('Alert Tests');
+                    
+                    const statuses = ['success', 'warning', 'error', 'info'];
+                    for (const status of statuses) {
+                        const alert = document.createElement('cre8-alert');
+                        alert.setAttribute('status', status);
+                        alert.setAttribute('variant', 'banner');
+                        alert.setAttribute('emphasis', 'subtle');
+                        alert.setAttribute('header-text', `${status} Alert`);
+                        alert.textContent = `This is a ${status} alert message.`;
+                        testDiv.appendChild(alert);
+                    }
+
+                    await this.waitForRender();
+                    this.logResult('Alert Component', true, 'All alert statuses rendered successfully');
+                } catch (error) {
+                    this.logError(`Alert test failed: ${error.message}`);
+                    this.logResult('Alert Component', false, error.message);
+                }
+            }
+
+            async testTable() {
+                try {
+                    const testDiv = this.createTestSection('Table Tests');
+                    
+                    const table = document.createElement('cre8-table');
+                    table.setAttribute('variant', 'striped');
+                    table.setAttribute('is-hoverable', 'true');
+                    table.innerHTML = `
+                        <cre8-table-header>
+                            <cre8-table-row>
+                                <cre8-table-header-cell>Name</cre8-table-header-cell>
+                                <cre8-table-header-cell>Role</cre8-table-header-cell>
+                                <cre8-table-header-cell>Status</cre8-table-header-cell>
+                            </cre8-table-row>
+                        </cre8-table-header>
+                        <cre8-table-body>
+                            <cre8-table-row>
+                                <cre8-table-cell>John Doe</cre8-table-cell>
+                                <cre8-table-cell>Developer</cre8-table-cell>
+                                <cre8-table-cell>Active</cre8-table-cell>
+                            </cre8-table-row>
+                            <cre8-table-row>
+                                <cre8-table-cell>Jane Smith</cre8-table-cell>
+                                <cre8-table-cell>Designer</cre8-table-cell>
+                                <cre8-table-cell>Active</cre8-table-cell>
+                            </cre8-table-row>
+                        </cre8-table-body>
+                    `;
+                    testDiv.appendChild(table);
+
+                    await this.waitForRender();
+                    this.logResult('Table Component', true, 'Table component rendered successfully');
+                } catch (error) {
+                    this.logError(`Table test failed: ${error.message}`);
+                    this.logResult('Table Component', false, error.message);
+                }
+            }
+
+            async testGrid() {
+                try {
+                    const testDiv = this.createTestSection('Grid Tests');
+                    
+                    const variants = ['2up', '3up', '4up'];
+                    for (const variant of variants) {
+                        const grid = document.createElement('cre8-grid');
+                        grid.setAttribute('variant', variant);
+                        grid.setAttribute('gap', 'lg');
+                        
+                        for (let i = 1; i <= 4; i++) {
+                            const gridItem = document.createElement('cre8-grid-item');
+                            gridItem.innerHTML = `<div style="padding: 16px; background: #f1f5f9; border-radius: 8px;">${variant} Item ${i}</div>`;
+                            grid.appendChild(gridItem);
+                        }
+                        
+                        testDiv.appendChild(grid);
+                    }
+
+                    await this.waitForRender();
+                    this.logResult('Grid Component', true, 'All grid variants rendered successfully');
+                } catch (error) {
+                    this.logError(`Grid test failed: ${error.message}`);
+                    this.logResult('Grid Component', false, error.message);
+                }
+            }
+
+            async testFormComponents() {
+                try {
+                    const testDiv = this.createTestSection('Form Component Tests');
+                    
+                    // Test field
+                    const field = document.createElement('cre8-field');
+                    field.setAttribute('label', 'Test Field');
+                    field.setAttribute('placeholder', 'Enter text here');
+                    testDiv.appendChild(field);
+                    
+                    // Test select
+                    const select = document.createElement('cre8-select');
+                    select.setAttribute('label', 'Test Select');
+                    select.setAttribute('items', JSON.stringify([
+                        {label: 'Option 1', value: '1'},
+                        {label: 'Option 2', value: '2'}
+                    ]));
+                    testDiv.appendChild(select);
+                    
+                    // Test dropdown
+                    const dropdown = document.createElement('cre8-dropdown');
+                    dropdown.setAttribute('button-text', 'Test Dropdown');
+                    dropdown.innerHTML = `
+                        <cre8-dropdown-item>Item 1</cre8-dropdown-item>
+                        <cre8-dropdown-item>Item 2</cre8-dropdown-item>
+                    `;
+                    testDiv.appendChild(dropdown);
+
+                    await this.waitForRender();
+                    this.logResult('Form Components', true, 'All form components rendered successfully');
+                } catch (error) {
+                    this.logError(`Form components test failed: ${error.message}`);
+                    this.logResult('Form Components', false, error.message);
+                }
+            }
+
+            createTestSection(title) {
+                const section = document.createElement('div');
+                section.className = 'test-section';
+                section.innerHTML = `<div class="test-title">${title}</div>`;
+                
+                const componentDiv = document.createElement('div');
+                componentDiv.className = 'test-component';
+                section.appendChild(componentDiv);
+                
+                document.body.appendChild(section);
+                return componentDiv;
+            }
+
+            async waitForRender() {
+                return new Promise(resolve => {
+                    requestAnimationFrame(() => {
+                        setTimeout(resolve, 100); // Give components time to render
+                    });
+                });
+            }
+        }
+
+        // Run tests when DOM is loaded and components are defined
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Wait a bit for web components to be defined
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const tester = new DashboardTester();
+            await tester.runTests();
+        });
+    </script>
+</body>
+</html>

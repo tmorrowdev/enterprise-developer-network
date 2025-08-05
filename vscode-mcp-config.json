@@ -1,0 +1,18 @@
+{
+  "mcp.servers": {
+    "enterprise-code-standards": {
+      "command": "node",
+      "args": ["./mcp-servers/dist/code-standards/server.js"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    "enterprise-design-system": {
+      "command": "node", 
+      "args": ["./mcp-servers/dist/design-system/server.js"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    }
+  }
+}

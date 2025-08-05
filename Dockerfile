@@ -2,20 +2,26 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+# Copy package files first
 COPY mcp-servers/package.json ./mcp-servers/
 COPY dashboard/package.json ./dashboard/
 
+# Install dependencies
 RUN cd mcp-servers && npm install
 RUN cd dashboard && npm install
 
-COPY . .
+# Copy source code
+COPY mcp-servers/ ./mcp-servers/
+COPY dashboard/ ./dashboard/
+COPY data/ ./data/
+COPY start.sh ./
 
+# Build MCP servers
 RUN cd mcp-servers && npm run build
+
+# Make start script executable
+RUN chmod +x start.sh
 
 EXPOSE 3000 3002
 
-COPY start.sh /app/
-RUN chmod +x /app/start.sh
-
-CMD ["/app/start.sh"]
+CMD ["./start.sh"]

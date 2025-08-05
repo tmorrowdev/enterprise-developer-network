@@ -6,7 +6,8 @@
   "description": "MCP Server Network for Enterprise Standards",
   "scripts": {
     "build": "tsc",
-    "start:code-standards": "node dist/server.js",
+    "start": "node http-wrapper.js",
+    "start:code-standards": "node dist/code-standards/server.js",
     "start:developer-analytics": "node dist/developer-analytics/server.js",
     "start:learning-platform": "node dist/learning-platform/server.js",
     "start:design-system": "node dist/design-system/server.js",

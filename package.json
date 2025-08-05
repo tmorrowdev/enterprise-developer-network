@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "MCP Server Network for Enterprise Standards",
   "scripts": {
-    "start": "cd mcp-servers && node dist/server.js",
+    "start": "cd mcp-servers && npm start",
     "demo": "node demo/run-demo.js",
     "build": "cd mcp-servers && npm run build",
     "deploy": "docker-compose up -d",

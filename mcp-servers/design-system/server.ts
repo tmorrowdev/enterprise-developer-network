@@ -48,9 +48,9 @@ class DesignSystemServer {
     this.loadDesignSystem();
   }
 
-  private loadDesignSystem() {
+  private async loadDesignSystem() {
     this.loadCre8Components();
-    this.loadDesignTokens();
+    await this.loadDesignTokens();
   }
 
   private loadCre8Components() {
@@ -303,31 +303,61 @@ class DesignSystemServer {
       usage_frequency: 60
     };
 
-    [buttonComponent, cardComponent, alertComponent, inputComponent, modalComponent].forEach(component => {
+    const tabsComponent: Component = {
+      name: 'Tabs',
+      tagName: 'cre8-tabs',
+      description: 'Tab navigation component for organizing content into separate panels.',
+      props: [
+        { name: 'activeTab', type: 'string', description: 'ID of the currently active tab' },
+        { name: 'variant', type: 'string', description: 'Tab style variant', options: ['default', 'pills'], default: 'default' }
+      ],
+      slots: [
+        { name: 'default', description: 'Tab panel content using cre8-tab-panel elements' }
+      ],
+      examples: [
+        {
+          title: 'Basic Tabs',
+          description: 'Simple tab navigation with multiple panels',
+          code: `<cre8-tabs activeTab="tab1">
+  <cre8-tab-panel id="tab1" label="Overview">
+    <h3>Overview Content</h3>
+    <p>This is the overview panel content.</p>
+  </cre8-tab-panel>
+  <cre8-tab-panel id="tab2" label="Details">
+    <h3>Details Content</h3>
+    <p>This is the details panel content.</p>
+  </cre8-tab-panel>
+  <cre8-tab-panel id="tab3" label="Settings">
+    <h3>Settings Content</h3>
+    <p>This is the settings panel content.</p>
+  </cre8-tab-panel>
+</cre8-tabs>`
+        },
+        {
+          title: 'Pills Variant',
+          description: 'Tab navigation with pill-style buttons',
+          code: `<cre8-tabs activeTab="metrics" variant="pills">
+  <cre8-tab-panel id="metrics" label="📊 Metrics">
+    <p>Performance metrics and analytics</p>
+  </cre8-tab-panel>
+  <cre8-tab-panel id="team" label="👥 Team">
+    <p>Team collaboration data</p>
+  </cre8-tab-panel>
+</cre8-tabs>`
+        }
+      ],
+      usage_frequency: 75
+    };
+
+    const components = [buttonComponent, cardComponent, alertComponent, inputComponent, modalComponent, tabsComponent];
+    components.forEach(component => {
       this.components.set(component.name.toLowerCase(), component);
     });
   }
 
-  private loadDesignTokens() {
-    const fs = require('fs');
-    const path = require('path');
-    
-    try {
-      const dataPath = path.join(__dirname, '../../data/enterprise-data.json');
-      const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-      
-      if (data.design_system?.design_tokens?.colors) {
-        Object.entries(data.design_system.design_tokens.colors).forEach(([name, value]) => {
-          this.tokens.set(name, {
-            name,
-            value: value as string,
-            category: 'color'
-          });
-        });
-      }
-    } catch (error) {
-      console.warn('Could not load design tokens from enterprise-data.json');
-    }
+  private async loadDesignTokens() {
+    // Skip file loading in Docker build
+    console.warn('Skipping enterprise-data.json loading');
 
     const defaultTokens = [
       { name: 'primary', value: '#0066cc', category: 'color' as const },
