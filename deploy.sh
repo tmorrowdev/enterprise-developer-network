@@ -11,7 +11,7 @@ fi
 
 # Stop and remove existing container
 echo "🧹 Cleaning up existing deployment..."
-docker rm -f enterprise-demo 2>/dev/null || true
+docker rm -f enterprise-dev-network 2>/dev/null || true
 
 # Build the image
 echo "🔨 Building Docker image..."
@@ -27,7 +27,7 @@ echo "🚀 Starting Enterprise Developer Network..."
 docker run -d \
   -p 3000:3000 \
   -p 3002:3002 \
-  --name enterprise-demo \
+  --name enterprise-dev-network \
   --restart unless-stopped \
   enterprise-dev-network
 
@@ -47,8 +47,8 @@ if [ $? -eq 0 ]; then
     echo "   • Dark mode with design token overrides"
     echo "   • Interactive components and real-time updates"
     echo ""
-    echo "🔍 Check logs: docker logs enterprise-demo"
-    echo "🛑 Stop: docker stop enterprise-demo"
+    echo "🔍 Check logs: docker logs enterprise-dev-network"
+    echo "🛑 Stop: docker stop enterprise-dev-network"
 else
     echo "❌ Deployment failed"
     exit 1

@@ -218,7 +218,7 @@ class DesignSystemServer {
       usage_frequency: 70
     };
 
-     inputComponent: Component = {
+    const inputComponent: Component = {
       name: 'Field',
       tagName: 'cre8-field',
       description: 'Input field component for forms with validation and accessibility features.',
@@ -262,7 +262,7 @@ class DesignSystemServer {
       usage_frequency: 90
     };
 
-     modalComponent: Component = {
+    const modalComponent: Component = {
       name: 'Modal',
       tagName: 'cre8-modal',
       description: 'Modal dialog component for displaying content in an overlay.',
@@ -303,7 +303,7 @@ class DesignSystemServer {
       usage_frequency: 60
     };
 
-     tabsComponent: Component = {
+    const tabsComponent: Component = {
       name: 'Tabs',
       tagName: 'cre8-tabs',
       description: 'Tab navigation component for organizing content into separate panels.',
@@ -349,30 +349,15 @@ class DesignSystemServer {
       usage_frequency: 75
     };
 
-    [buttonComponent, cardComponent, alertComponent, inputComponent, modalComponent, tabsComponent].forEach(component => {
+    const components = [buttonComponent, cardComponent, alertComponent, inputComponent, modalComponent, tabsComponent];
+    components.forEach(component => {
       this.components.set(component.name.toLowerCase(), component);
     });
   }
 
   private async loadDesignTokens() {
-   
-    
-    try {
-      const dataPath = path.join(__dirname, '../../data/enterprise-data.json');
-      const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-      
-      if (data.design_system?.design_tokens?.colors) {
-        Object.entries(data.design_system.design_tokens.colors).forEach(([name, value]) => {
-          this.tokens.set(name, {
-            name,
-            value: value as string,
-            category: 'color'
-          });
-        });
-      }
-    } catch (error) {
-      console.warn('Could not load design tokens from enterprise-data.json');
-    }
+    // Skip file loading in Docker build
+    console.warn('Skipping enterprise-data.json loading');
 
     const defaultTokens = [
       { name: 'primary', value: '#0066cc', category: 'color' as const },

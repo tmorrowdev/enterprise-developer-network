@@ -241,7 +241,7 @@ Share the demo with colleagues using multiple deployment options:
 ```bash
 # Build and run with MCP server endpoints
 docker build -t enterprise-dev-network .
-docker run -d -p 3000:3000 -p 3002:3002 --name enterprise-demo enterprise-dev-network
+docker run -d -p 3000:3000 -p 3002:3002 --name enterprise-dev-network enterprise-dev-network
 
 # Access points:
 # Dashboard: http://localhost:3000
