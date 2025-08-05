@@ -67,8 +67,8 @@ class TestRunner {
     this.log(`Starting ${suite.name}...`, 'info');
     
     try {
-      const command = `npx wtr ${suite.files} --coverage --timeout ${suite.timeout}`;
-      const result = execSync(command, { 
+      const args = [ 'wtr', suite.files, '--coverage', '--timeout', String(suite.timeout) ];
+      const result = execFileSync('npx', args, { 
         encoding: 'utf8',
         cwd: process.cwd(),
         env: { ...process.env, NODE_ENV: 'test' }
