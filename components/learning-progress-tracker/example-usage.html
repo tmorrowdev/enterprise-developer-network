@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Learning Progress Tracker - Example Usage</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Load the cre8-wc components -->
+    <script type="module" src="https://esm.sh/@cre8_dev/cre8-wc"></script>
+    <link href="https://esm.sh/@cre8_dev/cre8-design-tokens@1.0.3/lib/web/brands/cre8/css/tokens_cre8.css" rel="stylesheet" type="text/css"/>
+    
+    <!-- Load our custom component -->
+    <script type="module" src="./learning-progress-tracker.js"></script>
+    
+    <style>
+        :root {
+            color-scheme: dark;
+            
+            /* Override design tokens for dark mode */
+            --cre8-color-background: #1a1a1a;
+            --cre8-color-surface: #262626;
+            --cre8-color-surface-variant: #404040;
+            --cre8-color-on-background: #e5e5e5;
+            --cre8-color-on-surface: #e5e5e5;
+            --cre8-color-primary: #60a5fa;
+            --cre8-color-secondary: #a3a3a3;
+            --cre8-color-text: #e5e5e5;
+            --cre8-color-text-secondary: #a3a3a3;
+            --cre8-color-border: #404040;
+            --cre8-color-border-hover: #2563eb;
+            
+            /* Success/Error/Warning colors for dark mode */
+            --cre8-color-success: #10b981;
+            --cre8-color-warning: #f59e0b;
+            --cre8-color-error: #ef4444;
+            --cre8-color-info: #3b82f6;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 24px;
+            background: #1a1a1a;
+            color: #e5e5e5;
+            min-height: 100vh;
+            color-scheme: dark;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #404040;
+        }
+        
+        .demo-controls {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+        
+        .example-section {
+            margin-bottom: 48px;
+        }
+        
+        .example-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--cre8-color-primary);
+        }
+        
+        .code-example {
+            background: #262626;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+        }
+        
+        pre {
+            margin: 0;
+        }
+        
+        .status-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            font-size: 0.875rem;
+        }
+        
+        .status-success {
+            background: var(--cre8-color-success);
+            color: white;
+        }
+        
+        .status-info {
+            background: var(--cre8-color-info);
+            color: white;
+        }
+        
+        .status-warning {
+            background: var(--cre8-color-warning);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Developer Learning Progress Tracker</h1>
+        <p>Interactive example showcasing the learning progress component with the @cre8-dev/cre8-wc design system</p>
+    </div>
+
+    <div class="demo-controls">
+        <cre8-button text="Load Sample Data" variant="primary" id="load-data"></cre8-button>
+        <cre8-button text="Show Loading State" variant="secondary" id="show-loading"></cre8-button>
+        <cre8-button text="Show Error State" variant="secondary" id="show-error"></cre8-button>
+        <cre8-button text="Add New Path" variant="tertiary" id="add-path"></cre8-button>
+        <cre8-button text="Add New Goal" variant="tertiary" id="add-goal"></cre8-button>
+        <cre8-button text="Update Progress" variant="tertiary" id="update-progress"></cre8-button>
+    </div>
+
+    <div id="status-messages"></div>
+
+    <div class="example-section">
+        <h2 class="example-title">Basic Usage</h2>
+        <learning-progress-tracker id="main-tracker"></learning-progress-tracker>
+    </div>
+
+    <div class="example-section">
+        <h2 class="example-title">Configuration Examples</h2>
+        
+        <h3>Minimal View (Skills and Goals Hidden)</h3>
+        <learning-progress-tracker 
+            id="minimal-tracker"
+            config='{"showSkills": false, "showGoals": false, "maxPathsToShow": 3}'
+        ></learning-progress-tracker>
+        
+        <h3>Skills Only View</h3>
+        <learning-progress-tracker 
+            id="skills-tracker"
+            config='{"showSkills": true, "showGoals": false, "showOverallProgress": false}'
+        ></learning-progress-tracker>
+    </div>
+
+    <div class="example-section">
+        <h2 class="example-title">Code Examples</h2>
+        
+        <h3>HTML Usage</h3>
+        <div class="code-example">
+            <pre><code>&lt;learning-progress-tracker
+    id="tracker"
+    config='{"showSkills": true, "showGoals": true, "enableGoalSetting": true}'&gt;
+&lt;/learning-progress-tracker&gt;</code></pre>
+        </div>
+        
+        <h3>JavaScript Integration</h3>
+        <div class="code-example">
+            <pre><code>// Get reference to the component
+const tracker = document.getElementById('tracker');
+
+// Set loading state
+tracker.loading = true;
+
+// Load data
+const data = await fetchLearningData();
+tracker.data = data;
+tracker.loading = false;
+
+// Listen for events
+tracker.addEventListener('add-learning-path', () => {
+    // Handle add path request
+});
+
+tracker.addEventListener('progress-updated', (e) => {
+    console.log('Progress updated:', e.detail);
+});
+
+// Update progress programmatically
+tracker.updateProgress('path-id', 75);</code></pre>
+        </div>
+        
+        <h3>TypeScript Types</h3>
+        <div class="code-example">
+            <pre><code>interface LearningProgressData {
+    learning_paths: LearningPath[];
+    skills: SkillLevel[];
+    goals: LearningGoal[];
+    overall_progress: number;
+}
+
+interface LearningPath {
+    id: string;
+    title: string;
+    difficulty: 'beginner' | 'intermediate' | 'advanced';
+    estimated_hours: number;
+    modules: string[];
+    progress?: number;
+    completed_modules?: string[];
+    status?: 'not_started' | 'in_progress' | 'completed';
+}</code></pre>
+        </div>
+    </div>
+
+    <script>
+        // Sample data matching the enterprise-data.json structure
+        const sampleData = {
+            learning_paths: [
+                {
+                    id: 'react_fundamentals',
+                    title: 'React Fundamentals',
+                    difficulty: 'beginner',
+                    estimated_hours: 20,
+                    modules: ['Components and JSX', 'Props and State', 'Event Handling', 'Lifecycle Methods'],
+                    progress: 75,
+                    completed_modules: ['Components and JSX', 'Props and State', 'Event Handling'],
+                    status: 'in_progress'
+                },
+                {
+                    id: 'typescript_advanced',
+                    title: 'Advanced TypeScript',
+                    difficulty: 'advanced',
+                    estimated_hours: 40,
+                    modules: ['Generics', 'Decorators', 'Advanced Types', 'Utility Types', 'Module Systems'],
+                    progress: 30,
+                    completed_modules: ['Generics'],
+                    status: 'in_progress'
+                },
+                {
+                    id: 'web_components',
+                    title: 'Web Components with Lit',
+                    difficulty: 'intermediate',
+                    estimated_hours: 25,
+                    modules: ['Custom Elements', 'Shadow DOM', 'Lit Element', 'Testing', 'Best Practices'],
+                    progress: 60,
+                    completed_modules: ['Custom Elements', 'Shadow DOM', 'Lit Element'],
+                    status: 'in_progress'
+                },
+                {
+                    id: 'node_backend',
+                    title: 'Node.js Backend Development',
+                    difficulty: 'intermediate',
+                    estimated_hours: 35,
+                    modules: ['Express.js', 'Database Integration', 'Authentication', 'API Design', 'Testing'],
+                    progress: 100,
+                    completed_modules: ['Express.js', 'Database Integration', 'Authentication', 'API Design', 'Testing'],
+                    status: 'completed'
+                }
+            ],
+            skills: [
+                {
+                    id: 'javascript',
+                    name: 'JavaScript',
+                    category: 'Programming Languages',
+                    level: 'advanced',
+                    progress: 85,
+                    last_updated: '2024-08-01'
+                },
+                {
+                    id: 'typescript',
+                    name: 'TypeScript',
+                    category: 'Programming Languages',
+                    level: 'intermediate',
+                    progress: 70,
+                    last_updated: '2024-08-03'
+                },
+                {
+                    id: 'react',
+                    name: 'React',
+                    category: 'Frontend Frameworks',
+                    level: 'advanced',
+                    progress: 80,
+                    last_updated: '2024-08-05'
+                },
+                {
+                    id: 'nodejs',
+                    name: 'Node.js',
+                    category: 'Backend Technologies',
+                    level: 'expert',
+                    progress: 95,
+                    last_updated: '2024-07-28'
+                },
+                {
+                    id: 'testing',
+                    name: 'Unit Testing',
+                    category: 'Development Tools',
+                    level: 'intermediate',
+                    progress: 65,
+                    last_updated: '2024-08-02'
+                },
+                {
+                    id: 'git',
+                    name: 'Git & Version Control',
+                    category: 'Development Tools',
+                    level: 'advanced',
+                    progress: 90,
+                    last_updated: '2024-07-15'
+                }
+            ],
+            goals: [
+                {
+                    id: 'goal1',
+                    title: 'Master React Hooks',
+                    description: 'Complete understanding of all React hooks including custom hooks and advanced patterns',
+                    target_completion_date: '2024-12-31',
+                    progress: 60,
+                    status: 'active',
+                    learning_path_id: 'react_fundamentals'
+                },
+                {
+                    id: 'goal2',
+                    title: 'TypeScript Certification',
+                    description: 'Achieve Microsoft TypeScript certification and implement advanced type patterns',
+                    target_completion_date: '2024-11-15',
+                    progress: 25,
+                    status: 'active',
+                    learning_path_id: 'typescript_advanced'
+                },
+                {
+                    id: 'goal3',
+                    title: 'Build Component Library',
+                    description: 'Create and publish a comprehensive web component library using Lit',
+                    target_completion_date: '2024-10-30',
+                    progress: 40,
+                    status: 'active',
+                    learning_path_id: 'web_components'
+                },
+                {
+                    id: 'goal4',
+                    title: 'Contribute to Open Source',
+                    description: 'Make meaningful contributions to at least 3 open source projects',
+                    target_completion_date: '2024-09-30',
+                    progress: 80,
+                    status: 'active'
+                }
+            ],
+            overall_progress: 66
+        };
+
+        // Get component references
+        const mainTracker = document.getElementById('main-tracker');
+        const minimalTracker = document.getElementById('minimal-tracker');
+        const skillsTracker = document.getElementById('skills-tracker');
+        const statusMessages = document.getElementById('status-messages');
+
+        // Event handlers
+        document.getElementById('load-data').addEventListener('click', () => {
+            mainTracker.loading = false;
+            mainTracker.errorMessage = '';
+            mainTracker.data = sampleData;
+            
+            minimalTracker.data = sampleData;
+            skillsTracker.data = sampleData;
+            
+            showStatus('Sample data loaded successfully!', 'success');
+        });
+
+        document.getElementById('show-loading').addEventListener('click', () => {
+            mainTracker.loading = true;
+            mainTracker.errorMessage = '';
+            showStatus('Loading state activated', 'info');
+            
+            setTimeout(() => {
+                mainTracker.loading = false;
+                mainTracker.data = sampleData;
+                showStatus('Loading completed', 'success');
+            }, 2000);
+        });
+
+        document.getElementById('show-error').addEventListener('click', () => {
+            mainTracker.loading = false;
+            mainTracker.data = null;
+            mainTracker.errorMessage = 'Failed to load learning progress data. Please check your connection and try again.';
+            showStatus('Error state activated', 'warning');
+        });
+
+        document.getElementById('add-path').addEventListener('click', () => {
+            const newPath = {
+                id: 'new_path_' + Date.now(),
+                title: 'New Learning Path',
+                difficulty: 'intermediate',
+                estimated_hours: 30,
+                modules: ['Module 1', 'Module 2', 'Module 3'],
+                progress: 0,
+                completed_modules: [],
+                status: 'not_started'
+            };
+            
+            mainTracker.addLearningPath(newPath);
+            showStatus('New learning path added!', 'success');
+        });
+
+        document.getElementById('add-goal').addEventListener('click', () => {
+            const newGoal = {
+                id: 'new_goal_' + Date.now(),
+                title: 'New Learning Goal',
+                description: 'A dynamically added learning goal to demonstrate the functionality',
+                target_completion_date: '2024-12-31',
+                progress: 0,
+                status: 'active'
+            };
+            
+            mainTracker.addLearningGoal(newGoal);
+            showStatus('New learning goal added!', 'success');
+        });
+
+        document.getElementById('update-progress').addEventListener('click', () => {
+            // Update progress for the first path
+            if (mainTracker.data?.learning_paths?.length > 0) {
+                const pathId = mainTracker.data.learning_paths[0].id;
+                const currentProgress = mainTracker.data.learning_paths[0].progress || 0;
+                const newProgress = Math.min(100, currentProgress + 10);
+                
+                mainTracker.updateProgress(pathId, newProgress);
+                showStatus(`Progress updated to ${newProgress}%`, 'success');
+            }
+        });
+
+        // Component event listeners
+        mainTracker.addEventListener('add-learning-path', () => {
+            showStatus('Add learning path requested', 'info');
+        });
+
+        mainTracker.addEventListener('add-learning-goal', () => {
+            showStatus('Add learning goal requested', 'info');
+        });
+
+        mainTracker.addEventListener('progress-updated', (e) => {
+            showStatus(`Progress updated: ${e.detail.pathId} to ${e.detail.progress}%`, 'success');
+        });
+
+        mainTracker.addEventListener('learning-path-added', (e) => {
+            showStatus(`Learning path added: ${e.detail.path.title}`, 'success');
+        });
+
+        mainTracker.addEventListener('learning-goal-added', (e) => {
+            showStatus(`Learning goal added: ${e.detail.goal.title}`, 'success');
+        });
+
+        mainTracker.addEventListener('retry-load', () => {
+            showStatus('Retry requested', 'info');
+            document.getElementById('load-data').click();
+        });
+
+        function showStatus(message, type) {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.textContent = message;
+            
+            statusMessages.appendChild(statusDiv);
+            
+            setTimeout(() => {
+                statusDiv.remove();
+            }, 3000);
+        }
+
+        // Load sample data by default
+        setTimeout(() => {
+            document.getElementById('load-data').click();
+        }, 500);
+    </script>
+</body>
+</html>

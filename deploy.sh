@@ -1,45 +1,55 @@
 #!/bin/bash
 
-echo "🚀 Enterprise MCP Demo Deployment"
+echo "🚀 Enterprise Developer Network Deployment"
+echo ""
 
-# Build the project
-echo "📦 Building MCP servers..."
-cd mcp-servers && npm install && npm run build && cd ..
+# Check if Docker is available
+if ! command -v docker &> /dev/null; then
+    echo "❌ Docker not found. Please install Docker first."
+    exit 1
+fi
 
-echo "📦 Installing dashboard dependencies..."
-cd dashboard && npm install && cd ..
+# Stop and remove existing container
+echo "🧹 Cleaning up existing deployment..."
+docker rm -f enterprise-demo 2>/dev/null || true
 
-# Choose deployment method
-echo "Choose deployment method:"
-echo "1) Docker (local/server)"
-echo "2) Railway (cloud)"
-echo "3) Vercel (serverless)"
-echo "4) Manual setup"
+# Build the image
+echo "🔨 Building Docker image..."
+docker build -t enterprise-dev-network .
 
-read -p "Enter choice (1-4): " choice
+if [ $? -ne 0 ]; then
+    echo "❌ Docker build failed"
+    exit 1
+fi
 
-case $choice in
-  1)
-    echo "🐳 Building Docker image..."
-    docker build -t enterprise-mcp-demo .
-    echo "🚀 Starting containers..."
-    docker-compose up -d
-    echo "✅ Demo available at http://localhost:3000"
-    echo "📊 Dashboard: http://localhost:3000"
-    echo "🔍 Health check: http://localhost:3000/api/health"
-    ;;
-  2)
-    echo "🚂 Deploying to Railway..."
-    echo "Run: railway login && railway up"
-    ;;
-  3)
-    echo "▲ Deploying to Vercel..."
-    echo "Run: vercel --prod"
-    ;;
-  4)
-    echo "📋 Manual setup:"
-    echo "1. cd dashboard && npm start"
-    echo "2. Open http://localhost:3000"
-    echo "3. Run demos: node demo/run-demo.js"
-    ;;
-esac
+# Run the container
+echo "🚀 Starting Enterprise Developer Network..."
+docker run -d \
+  -p 3000:3000 \
+  -p 3002:3002 \
+  --name enterprise-demo \
+  --restart unless-stopped \
+  enterprise-dev-network
+
+if [ $? -eq 0 ]; then
+    echo ""
+    echo "✅ Deployment successful!"
+    echo ""
+    echo "🎨 Creative Dashboard: http://localhost:3000"
+    echo "📊 Classic Dashboard: http://localhost:3000/classic"
+    echo "🎯 Demo Interface: http://localhost:3000/demo"
+    echo "🔧 MCP Health: http://localhost:3002/health"
+    echo "🛠️  MCP Endpoints: http://localhost:3002/mcp/{server-name}"
+    echo ""
+    echo "🌟 New Features:"
+    echo "   • Enhanced cre8 component library integration"
+    echo "   • Tab-based navigation with 4 dashboard views"
+    echo "   • Dark mode with design token overrides"
+    echo "   • Interactive components and real-time updates"
+    echo ""
+    echo "🔍 Check logs: docker logs enterprise-demo"
+    echo "🛑 Stop: docker stop enterprise-demo"
+else
+    echo "❌ Deployment failed"
+    exit 1
+fi

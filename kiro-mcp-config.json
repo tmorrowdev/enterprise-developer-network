@@ -1,0 +1,57 @@
+{
+  "servers": [
+    {
+      "name": "enterprise-code-standards",
+      "description": "Enterprise code standards validation and style guide enforcement",
+      "command": "node",
+      "args": ["mcp-servers/dist/code-standards/server.js"],
+      "tools": [
+        "validate_code",
+        "get_style_guide"
+      ]
+    },
+    {
+      "name": "enterprise-design-system", 
+      "description": "cre8-wc component library and design system documentation",
+      "command": "node",
+      "args": ["mcp-servers/dist/design-system/server.js"],
+      "tools": [
+        "get_component",
+        "list_components", 
+        "get_design_tokens",
+        "validate_usage"
+      ]
+    },
+    {
+      "name": "enterprise-developer-analytics",
+      "description": "Developer productivity metrics and team analytics",
+      "command": "node", 
+      "args": ["mcp-servers/dist/developer-analytics/server.js"],
+      "tools": [
+        "get_developer_metrics",
+        "get_team_analytics"
+      ]
+    },
+    {
+      "name": "enterprise-learning-platform",
+      "description": "Learning progress tracking and course recommendations", 
+      "command": "node",
+      "args": ["mcp-servers/dist/learning-platform/server.js"],
+      "tools": [
+        "get_learning_progress",
+        "recommend_courses"
+      ]
+    },
+    {
+      "name": "enterprise-onboarding-assistant",
+      "description": "New hire onboarding tasks and mentor assignment",
+      "command": "node",
+      "args": ["mcp-servers/dist/onboarding-assistant/server.js"], 
+      "tools": [
+        "get_onboarding_tasks",
+        "assign_mentor",
+        "get_documentation"
+      ]
+    }
+  ]
+}

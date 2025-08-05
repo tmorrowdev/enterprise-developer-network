@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "enterprise-code-standards": {
+      "command": "node",
+      "args": ["dist/code-standards/server.js"],
+      "cwd": "./mcp-servers"
+    },
+    "enterprise-developer-analytics": {
+      "command": "node", 
+      "args": ["dist/developer-analytics/server.js"],
+      "cwd": "./mcp-servers"
+    },
+    "enterprise-design-system": {
+      "command": "node",
+      "args": ["dist/design-system/server.js"], 
+      "cwd": "./mcp-servers"
+    },
+    "enterprise-learning-platform": {
+      "command": "node",
+      "args": ["dist/learning-platform/server.js"],
+      "cwd": "./mcp-servers"
+    },
+    "enterprise-onboarding-assistant": {
+      "command": "node",
+      "args": ["dist/onboarding-assistant/server.js"],
+      "cwd": "./mcp-servers"
+    }
+  }
+}

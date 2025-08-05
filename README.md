@@ -44,15 +44,35 @@ npm install
 npm run build
 ```
 
-## Kiro Integration
+## MCP Client Configuration
 
-The servers are configured for Kiro in `kiro-config.json`. Each server runs independently and can be connected to Kiro's MCP support system.
+Multiple configuration files are provided for different MCP clients:
 
-## Usage with Kiro
+### Claude Desktop
+Copy `claude-desktop-config.json` to your Claude Desktop MCP configuration:
+```bash
+# macOS
+~/Library/Application Support/Claude/claude_desktop_config.json
+```
 
-1. Build the servers: `npm run build`
-2. Configure Kiro to use the MCP servers from `kiro-config.json`
-3. Access enterprise tools through Kiro's AI interface
+### Kiro
+Use `kiro-mcp-config.json` for Kiro's MCP integration:
+```bash
+kiro config add-mcp-servers kiro-mcp-config.json
+```
+
+### VS Code
+Add `vscode-mcp-config.json` to your VS Code settings:
+```json
+{
+  "mcp.servers": {
+    // Copy contents from vscode-mcp-config.json
+  }
+}
+```
+
+### HTTP Clients
+For remote access, use `http-mcp-config.json` with the HTTP wrapper at `http://localhost:3002`
 
 ## Enterprise Benefits
 
@@ -185,23 +205,22 @@ npm start
 
 ## Quick Start
 
-1. **Migrate to cre8-wc** (if updating from Shoelace):
+### Option 1: Docker (Recommended)
 ```bash
-./update-to-cre8.sh
+./deploy.sh
 ```
 
-2. **Install dependencies**:
+### Option 2: Local Development
 ```bash
-cd mcp-servers
-npm install
-npm run build
-```
+# Install dependencies
+cd mcp-servers && npm install && npm run build
+cd ../dashboard && npm install
 
-3. **Start dashboard**:
-```bash
-cd dashboard
-npm install
-npm start
+# Start MCP servers
+cd ../mcp-servers && npm start &
+
+# Start dashboard
+cd ../dashboard && npm start
 ```
 
 3. **Run demos**:
