@@ -218,7 +218,7 @@ class DesignSystemServer {
       usage_frequency: 70
     };
 
-    const inputComponent: Component = {
+     inputComponent: Component = {
       name: 'Field',
       tagName: 'cre8-field',
       description: 'Input field component for forms with validation and accessibility features.',
@@ -262,7 +262,7 @@ class DesignSystemServer {
       usage_frequency: 90
     };
 
-    const modalComponent: Component = {
+     modalComponent: Component = {
       name: 'Modal',
       tagName: 'cre8-modal',
       description: 'Modal dialog component for displaying content in an overlay.',
@@ -303,7 +303,7 @@ class DesignSystemServer {
       usage_frequency: 60
     };
 
-    const tabsComponent: Component = {
+     tabsComponent: Component = {
       name: 'Tabs',
       tagName: 'cre8-tabs',
       description: 'Tab navigation component for organizing content into separate panels.',
@@ -355,8 +355,7 @@ class DesignSystemServer {
   }
 
   private async loadDesignTokens() {
-    const fs = await import('fs');
-    const path = await import('path');
+   
     
     try {
       const dataPath = path.join(__dirname, '../../data/enterprise-data.json');
