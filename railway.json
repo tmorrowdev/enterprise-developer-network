@@ -4,7 +4,7 @@
     "builder": "DOCKERFILE"
   },
   "deploy": {
-    "startCommand": "node mcp-server-deployment/http-wrapper.js",
+    "startCommand": "node http-wrapper.js",
     "healthcheckPath": "/health"
   }
 }
