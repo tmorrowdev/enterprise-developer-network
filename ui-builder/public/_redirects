@@ -1,0 +1,3 @@
+/api/generate-ui /.netlify/functions/generate-ui 200
+/api/refine-ui /.netlify/functions/refine-ui 200
+/api/components /.netlify/functions/components 200

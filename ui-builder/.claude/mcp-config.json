@@ -1,0 +1,128 @@
+{
+  "mcpServers": {
+    "cre8-design-system-local": {
+      "command": "node",
+      "args": ["../../mcp-servers/dist/design-system/server.js"],
+      "env": {
+        "NODE_ENV": "development",
+        "COMPONENTS_FILE": "../../cre8-wc-components.md"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "get_component",
+        "list_components", 
+        "get_component_examples",
+        "validate_usage",
+        "generate_component_code",
+        "get_design_tokens"
+      ],
+      "description": "Local MCP server for development with cre8-wc design system"
+    },
+    "cre8-design-system-remote": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-http",
+        "--url", "${MCP_SERVER_URL:-https://your-mcp-server.railway.app}"
+      ],
+      "env": {
+        "MCP_SERVER_URL": "https://your-mcp-server.railway.app"
+      },
+      "disabled": true,
+      "autoApprove": [
+        "get_component",
+        "list_components", 
+        "get_component_examples",
+        "validate_usage",
+        "generate_component_code",
+        "get_design_tokens"
+      ],
+      "description": "Remote HTTP MCP server for production deployment"
+    }
+  },
+  "tools": {
+    "design_system": {
+      "get_component": {
+        "description": "Get detailed component documentation with usage examples, props, and slots",
+        "parameters": {
+          "name": {
+            "type": "string",
+            "description": "Component name (e.g., 'button', 'card', 'alert')",
+            "required": true
+          }
+        }
+      },
+      "list_components": {
+        "description": "List all available components with brief descriptions and kebab-case tag names",
+        "parameters": {
+          "format": {
+            "type": "string",
+            "enum": ["detailed", "names-only"],
+            "description": "Output format - detailed list or just component names",
+            "default": "detailed"
+          }
+        }
+      },
+      "get_component_examples": {
+        "description": "Get usage examples for a specific component",
+        "parameters": {
+          "name": {
+            "type": "string", 
+            "description": "Component name",
+            "required": true
+          },
+          "example_type": {
+            "type": "string",
+            "description": "Specific example type to filter by"
+          }
+        }
+      },
+      "validate_usage": {
+        "description": "Validate component usage and props",
+        "parameters": {
+          "component": {
+            "type": "string",
+            "description": "Component name",
+            "required": true
+          },
+          "props": {
+            "type": "object",
+            "description": "Props to validate",
+            "required": true
+          }
+        }
+      },
+      "generate_component_code": {
+        "description": "Generate complete component code with specified props and content",
+        "parameters": {
+          "component": {
+            "type": "string",
+            "description": "Component name",
+            "required": true
+          },
+          "props": {
+            "type": "object",
+            "description": "Component props"
+          },
+          "content": {
+            "type": "string",
+            "description": "Component content/slots"
+          },
+          "variant": {
+            "type": "string",
+            "description": "Component variant"
+          }
+        }
+      },
+      "get_design_tokens": {
+        "description": "Get design tokens by category",
+        "parameters": {
+          "category": {
+            "type": "string",
+            "enum": ["color", "spacing", "typography", "shadow"],
+            "description": "Token category to filter by"
+          }
+        }
+      }
+    }
+  }
+}

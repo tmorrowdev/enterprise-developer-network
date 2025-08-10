@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cre8 UI Builder - Design System Powered No-Code Tool</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@cre8_dev/cre8-design-tokens@1.0.3/lib/web/brands/cre8/css/tokens_cre8.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="header-title">Cre8 UI Builder</h1>
+                <p class="header-subtitle">Design System Powered No-Code UI Generator</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Left Panel - Input -->
+            <div class="panel panel-input">
+                <div class="panel-header">
+                    <h2>Describe Your UI</h2>
+                    <div class="framework-selector">
+                        <label for="framework">Framework:</label>
+                        <select id="framework" class="framework-select">
+                            <option value="html">HTML with Cre8 Components</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="input-section">
+                    <textarea 
+                        id="prompt" 
+                        class="prompt-input" 
+                        placeholder="Describe the UI you want to create. For example:
+
+'Create a user profile card with an avatar, name, email, and edit button. Make it responsive and accessible.'
+
+'Build a dashboard with navigation sidebar, main content area, and a stats widget showing key metrics.'
+
+'Design a contact form with name, email, message fields and a submit button. Include validation states.'"
+                        rows="8"
+                    ></textarea>
+                    
+                    <div class="input-actions">
+                        <button id="generateBtn" class="btn btn-primary">
+                            <span class="btn-text">Generate UI</span>
+                            <div class="btn-spinner" style="display: none;"></div>
+                        </button>
+                        <button id="clearBtn" class="btn btn-secondary">Clear</button>
+                    </div>
+                </div>
+
+                <!-- Progress Indicator -->
+                <div id="progress" class="progress-section" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <p class="progress-text">Initializing...</p>
+                </div>
+
+                <!-- Component Library -->
+                <div class="component-library">
+                    <h3>Available Components</h3>
+                    <div id="componentList" class="component-list">
+                        <div class="loading">Loading components...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Output -->
+            <div class="panel panel-output">
+                <div class="panel-header">
+                    <h2>Generated Code</h2>
+                    <div class="output-actions">
+                        <button id="copyBtn" class="btn btn-secondary" disabled>Copy Code</button>
+                        <button id="previewBtn" class="btn btn-secondary" disabled>Preview</button>
+                        <button id="downloadBtn" class="btn btn-secondary" disabled>Download</button>
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <div id="codeOutput" class="code-output">
+                        <div class="empty-state">
+                            <div class="empty-icon">🎨</div>
+                            <h3>Ready to Build</h3>
+                            <p>Describe your UI in the left panel and click "Generate UI" to get started.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Refinement Section -->
+                <div id="refinementSection" class="refinement-section" style="display: none;">
+                    <h3>Refine Your UI</h3>
+                    <textarea 
+                        id="feedback" 
+                        class="feedback-input" 
+                        placeholder="Describe what you'd like to change or improve..."
+                        rows="3"
+                    ></textarea>
+                    <button id="refineBtn" class="btn btn-primary">Apply Changes</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Preview Modal -->
+        <div id="previewModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>UI Preview</h3>
+                    <button id="closePreview" class="btn btn-secondary">Close</button>
+                </div>
+                <div class="modal-body">
+                    <div class="preview-container">
+                        <div class="preview-tabs">
+                            <button class="preview-tab active" data-tab="desktop">Desktop</button>
+                            <button class="preview-tab" data-tab="tablet">Tablet</button>
+                            <button class="preview-tab" data-tab="mobile">Mobile</button>
+                        </div>
+                        <div class="preview-frame">
+                            <iframe id="previewFrame" src="about:blank"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app-netlify.js"></script>
+</body>
+</html>

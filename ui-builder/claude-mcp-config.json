@@ -1,0 +1,33 @@
+{
+  "mcpServers": {
+    "cre8-design-system": {
+      "command": "node",
+      "args": ["../mcp-servers/dist/design-system/server.js"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "get_component",
+        "list_components", 
+        "get_component_examples",
+        "validate_usage",
+        "generate_component_code",
+        "get_design_tokens"
+      ]
+    },
+    "cre8-design-system-http": {
+      "command": "curl",
+      "args": [
+        "-X", "GET",
+        "-H", "Content-Type: application/json",
+        "${MCP_SERVER_URL:-http://localhost:3002}/mcp/design-system/${tool_name}?${query_params}"
+      ],
+      "env": {
+        "MCP_SERVER_URL": "https://your-mcp-server.railway.app"
+      },
+      "disabled": true,
+      "description": "HTTP-based MCP server for production deployment"
+    }
+  }
+}
