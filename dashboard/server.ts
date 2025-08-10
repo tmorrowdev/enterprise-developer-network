@@ -1,7 +1,20 @@
 import express from 'express';
 import { exec } from 'child_process';
 import path from 'path';
+import { query, type SDKMessage } from "@anthropic-ai/claude-code";
 
+const messages: SDKMessage[] = [];
+
+for await (const message of query({
+  prompt: "Write a haiku about foo.py",
+  options: {
+    maxTurns: 3,
+  },
+})) {
+  messages.push(message);
+}
+
+console.log(messages);
 const app = express();
 const PORT = 3000;
 

@@ -1,0 +1,68 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <script type="importmap">
+      {
+        "imports": {
+          "@cre8_dev/cre8-wc": "https://esm.sh/npm/@cre8_dev/cre8-wc",
+          "lit": "https://esm.sh/npm/lit@latest"
+        }
+      }
+    </script>
+    <script type="module" lang="ts">
+      import "@cre8_dev/cre8-wc";
+      import { html, unsafeCss, css, LitElement } from "lit";
+
+      const customCss = unsafeCSS(css`
+        /* 
+    * 
+    * custom css should 
+    * be defined here if   
+    * any design system    * overrides are 
+    * needed. 
+    * 
+    * 
+    */
+      `);
+
+      class GeneratedInterface extends LitElement {
+        static styles = [customCss];
+
+        constructor() {
+          super();
+        }
+
+        /*
+    Any Lit life cycle methods, @property(), @state(), etc.
+    should be defined here
+    */
+
+        /* 
+    Any custom methods or event handlers should be defined here 
+    */
+
+        /* 
+    IMPORTANT! please put your  generated HTML + @cre8_dev/cre8-wc components in the 
+    ** html ** 
+    function provided by Lit below. DO NOT put anything generated outside of this script tag!
+    */
+
+        render() {
+          return html` /* please insert the HTML template here */ `;
+        }
+      }
+
+      customElements.define("generated-interface", GeneratedInterface);
+
+      // customElements.define('generated-interface', GeneratedInterface);
+    </script>
+  </head>
+
+  <body>
+    <generated-interface></generated-interface>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "design-system": {
+      "command": "node",
+      "args": ["dist/design-system/server.js"],
+      "description": "Access to cre8-wc component library and design tokens"
+    }
+  }
+}

@@ -8,6 +8,12 @@
         "run"
       ],
       "type": "stdio"
+    },
+    "design-system": {
+      "command": "node",
+      "args": ["mcp-servers/dist/design-system/server.js"],
+      "disabled": false,
+      "autoApprove": ["list_components", "get_component", "get_component_examples"]
     }
   }
 }
