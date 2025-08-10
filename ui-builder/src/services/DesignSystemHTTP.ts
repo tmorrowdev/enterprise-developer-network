@@ -32,11 +32,11 @@ export class DesignSystemHTTP {
   private cacheTimeout: number = 5 * 60 * 1000; // 5 minutes
 
   constructor(mcpServerUrl?: string) {
-    this.mcpServerUrl = mcpServerUrl || process.env.MCP_SERVER_URL || 'https://your-mcp-server.railway.app';
+    this.mcpServerUrl = mcpServerUrl || process.env.MCP_SERVER_URL || 'https://enterprisedsnetwork-production.up.railway.app';
   }
 
-  private async callMCPEndpoint(endpoint: string, params: Record<string, any> = {}): Promise<any> {
-    const cacheKey = `${endpoint}-${JSON.stringify(params)}`;
+  private async callMCPTool(toolName: string, args: Record<string, any> = {}): Promise<any> {
+    const cacheKey = `${toolName}-${JSON.stringify(args)}`;
     
     // Check cache first
     if (this.cache.has(cacheKey)) {
@@ -47,19 +47,21 @@ export class DesignSystemHTTP {
     }
 
     try {
-      const url = new URL(`/mcp/design-system/${endpoint}`, this.mcpServerUrl);
+      // Use direct HTTP endpoints instead of JSON-RPC
+      let url = `${this.mcpServerUrl}/mcp/design-system/${toolName}`;
       
-      // Add query parameters
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          url.searchParams.append(key, String(value));
-        }
-      });
+      // Add query parameters for GET requests
+      if (Object.keys(args).length > 0) {
+        const params = new URLSearchParams();
+        Object.entries(args).forEach(([key, value]) => {
+          params.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
+        });
+        url += `?${params.toString()}`;
+      }
 
-      const response = await fetch(url.toString(), {
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json'
         }
       });
@@ -69,49 +71,37 @@ export class DesignSystemHTTP {
       }
 
       const result = await response.json();
+      const data = result;
       
       // Cache the result
       this.cache.set(cacheKey, {
-        data: result,
+        data,
         timestamp: Date.now()
       });
 
-      return result;
+      return data;
     } catch (error) {
-      console.error(`Error calling MCP endpoint ${endpoint}:`, error);
+      console.error(`Error calling MCP tool ${toolName}:`, error);
       throw error;
     }
   }
 
-  async listComponents(format: 'detailed' | 'names-only' = 'detailed'): Promise<Component[]> {
+  async listComponents(format: 'detailed' | 'names-only' = 'names-only'): Promise<Component[]> {
     try {
-      const result = await this.callMCPEndpoint('list_components', { format });
+      const result = await this.callMCPTool('list_components', { format: 'names-only' });
       
-      if (format === 'names-only') {
-        // Parse the text response to extract component names
-        const text = result.content || result.text || '';
-        const lines = text.split('\n').filter((line: string) => line.startsWith('cre8-'));
-        return lines.map((tagName: string) => ({ 
-          tagName, 
-          name: this.tagNameToComponentName(tagName),
-          description: ''
-        }));
-      }
+      // Extract text from MCP response format
+      const text = result.content?.[0]?.text || result.content || result.text || '';
       
-      // Parse detailed format
-      const text = result.content || result.text || '';
-      const componentRegex = /• \*\*(.+?)\*\* \(`(.+?)`\) - (.+)/g;
-      const components: Component[] = [];
-      let match;
+      // Parse the text response to extract component names
+      const lines = text.split('\n').filter((line: string) => line.startsWith('cre8-'));
+      const components = lines.map((tagName: string) => ({ 
+        tagName: tagName.trim(), 
+        name: this.tagNameToComponentName(tagName.trim()),
+        description: `${this.tagNameToComponentName(tagName.trim())} component for the Cre8 design system.`
+      }));
       
-      while ((match = componentRegex.exec(text)) !== null) {
-        components.push({
-          name: match[1],
-          tagName: match[2],
-          description: match[3]
-        });
-      }
-      
+      console.log(`Loaded ${components.length} components from MCP server`);
       return components;
     } catch (error) {
       console.error('Error listing components:', error);
@@ -121,8 +111,8 @@ export class DesignSystemHTTP {
 
   async getComponent(name: string): Promise<Component | null> {
     try {
-      const result = await this.callMCPEndpoint('get_component', { name });
-      const text = result.content || result.text || '';
+      const result = await this.callMCPTool('get_component', { name });
+      const text = result.content?.[0]?.text || result.content || result.text || '';
       return this.parseComponentDocumentation(text);
     } catch (error) {
       console.error(`Error getting component ${name}:`, error);
@@ -137,8 +127,8 @@ export class DesignSystemHTTP {
         params.example_type = exampleType;
       }
       
-      const result = await this.callMCPEndpoint('get_component_examples', params);
-      const text = result.content || result.text || '';
+      const result = await this.callMCPTool('get_component_examples', params);
+      const text = result.content?.[0]?.text || result.content || result.text || '';
       return this.parseExamples(text);
     } catch (error) {
       console.error(`Error getting examples for ${name}:`, error);
@@ -148,8 +138,8 @@ export class DesignSystemHTTP {
 
   async validateComponentUsage(component: string, props: Record<string, any>): Promise<string> {
     try {
-      const result = await this.callMCPEndpoint('validate_usage', { component, props: JSON.stringify(props) });
-      return result.content || result.text || 'Validation failed';
+      const result = await this.callMCPTool('validate_usage', { component, props: JSON.stringify(props) });
+      return result.content?.[0]?.text || result.content || result.text || 'Validation failed';
     } catch (error) {
       console.error(`Error validating ${component}:`, error);
       return 'Validation failed';
@@ -172,8 +162,8 @@ export class DesignSystemHTTP {
         params.variant = variant;
       }
       
-      const result = await this.callMCPEndpoint('generate_component_code', params);
-      const text = result.content || result.text || '';
+      const result = await this.callMCPTool('generate_component_code', params);
+      const text = result.content?.[0]?.text || result.content || result.text || '';
       return this.extractCodeFromMarkdown(text);
     } catch (error) {
       console.error(`Error generating code for ${component}:`, error);
@@ -184,8 +174,8 @@ export class DesignSystemHTTP {
   async getDesignTokens(category?: string): Promise<Record<string, Array<{ name: string; value: string }>>> {
     try {
       const params: Record<string, any> = category ? { category } : {};
-      const result = await this.callMCPEndpoint('get_design_tokens', params);
-      const text = result.content || result.text || '';
+      const result = await this.callMCPTool('get_design_tokens', params);
+      const text = result.content?.[0]?.text || result.content || result.text || '';
       return this.parseDesignTokens(text);
     } catch (error) {
       console.error('Error getting design tokens:', error);

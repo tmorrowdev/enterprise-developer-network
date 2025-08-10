@@ -40,13 +40,14 @@ app.get('/', (req, res) => {
 
 app.post('/api/generate-ui', async (req, res) => {
   try {
-    const { prompt, framework = 'react' } = req.body;
+    const { prompt, framework = 'html' } = req.body;
     
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required' });
     }
 
-    const result = await uiBuilderAgent.generateUI(prompt, framework);
+    // Always use HTML framework
+    const result = await uiBuilderAgent.generateUI(prompt, 'html');
     res.json(result);
   } catch (error) {
     console.error('Error generating UI:', error);
@@ -56,13 +57,14 @@ app.post('/api/generate-ui', async (req, res) => {
 
 app.post('/api/refine-ui', async (req, res) => {
   try {
-    const { code, feedback, framework = 'react' } = req.body;
+    const { code, feedback, framework = 'html' } = req.body;
     
     if (!code || !feedback) {
       return res.status(400).json({ error: 'Code and feedback are required' });
     }
 
-    const result = await uiBuilderAgent.refineUI(code, feedback, framework);
+    // Always use HTML framework
+    const result = await uiBuilderAgent.refineUI(code, feedback, 'html');
     res.json(result);
   } catch (error) {
     console.error('Error refining UI:', error);
@@ -127,12 +129,13 @@ io.on('connection', (socket) => {
 
   socket.on('generate-ui', async (data) => {
     try {
-      const { prompt, framework = 'react' } = data;
+      const { prompt, framework = 'html' } = data;
       
       // Send progress updates
       socket.emit('progress', { stage: 'analyzing', message: 'Analyzing requirements...' });
       
-      const result = await uiBuilderAgent.generateUI(prompt, framework, (progress) => {
+      // Always use HTML framework
+      const result = await uiBuilderAgent.generateUI(prompt, 'html', (progress) => {
         socket.emit('progress', progress);
       });
       
@@ -144,11 +147,12 @@ io.on('connection', (socket) => {
 
   socket.on('refine-ui', async (data) => {
     try {
-      const { code, feedback, framework = 'react' } = data;
+      const { code, feedback, framework = 'html' } = data;
       
       socket.emit('progress', { stage: 'refining', message: 'Refining UI based on feedback...' });
       
-      const result = await uiBuilderAgent.refineUI(code, feedback, framework, (progress) => {
+      // Always use HTML framework
+      const result = await uiBuilderAgent.refineUI(code, feedback, 'html', (progress) => {
         socket.emit('progress', progress);
       });
       

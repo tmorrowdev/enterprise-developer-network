@@ -54,19 +54,32 @@ app.post('/mcp/:server', async (req, res) => {
     serverInstance.process.stdin.write(JSON.stringify(mcpRequest) + '\n');
     
     let response = '';
+    let responseComplete = false;
     const timeout = setTimeout(() => {
-      res.status(408).json({ error: 'Request timeout' });
-    }, 5000);
-    
-    serverInstance.process.stdout.once('data', (data) => {
-      clearTimeout(timeout);
-      try {
-        const result = JSON.parse(data.toString());
-        res.json(result);
-      } catch (e) {
-        res.status(500).json({ error: 'Invalid response from MCP server' });
+      if (!responseComplete) {
+        res.status(408).json({ error: 'Request timeout' });
       }
-    });
+    }, 10000);
+    
+    const onData = (data) => {
+      const chunk = data.toString();
+      response += chunk;
+      
+      // Try to parse the accumulated response
+      try {
+        const result = JSON.parse(response);
+        if (result && (result.result || result.error)) {
+          responseComplete = true;
+          clearTimeout(timeout);
+          serverInstance.process.stdout.removeListener('data', onData);
+          res.json(result);
+        }
+      } catch (e) {
+        // Response not complete yet, continue accumulating
+      }
+    };
+    
+    serverInstance.process.stdout.on('data', onData);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

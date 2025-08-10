@@ -1,8 +1,10 @@
 {
   "mcpServers": {
     "design-system": {
-      "command": "node",
-      "args": ["../mcp-servers/dist/design-system/server.js"],
+      "transport": {
+        "type": "https",
+        "url": "https://enterprisedsnetwork-production.up.railway.app/mcp/design-system"
+      },
       "disabled": false,
       "autoApprove": ["list_components", "get_component", "get_component_examples", "validate_usage", "generate_component_code", "get_design_tokens"]
     }

@@ -3,25 +3,18 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy package files first
-COPY mcp-servers/package.json ./mcp-servers/
-COPY dashboard/package.json ./dashboard/
+COPY mcp-server-deployment/package.json ./mcp-server-deployment/
 
 # Install dependencies
-RUN cd mcp-servers && npm install
-RUN cd dashboard && npm install
+RUN cd mcp-server-deployment && npm install
 
 # Copy source code
-COPY mcp-servers/ ./mcp-servers/
-COPY dashboard/ ./dashboard/
-COPY data/ ./data/
-COPY start.sh ./
+COPY mcp-server-deployment/ ./mcp-server-deployment/
+COPY cre8-wc-components.md ./mcp-server-deployment/
 
-# Build MCP servers
-RUN cd mcp-servers && npm run build
+# Make start script executable if it exists
+RUN if [ -f mcp-server-deployment/start.sh ]; then chmod +x mcp-server-deployment/start.sh; fi
 
-# Make start script executable
-RUN chmod +x start.sh
+EXPOSE 3002
 
-EXPOSE 3000 3002
-
-CMD ["./start.sh"]
+CMD ["node", "mcp-server-deployment/http-wrapper.js"]
