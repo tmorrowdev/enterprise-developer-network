@@ -6,6 +6,18 @@
     <title>Cre8 UI Builder - Design System Powered No-Code Tool</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@cre8_dev/cre8-design-tokens@1.0.3/lib/web/brands/cre8/css/tokens_cre8.css">
     <link rel="stylesheet" href="styles.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "@cre8_dev/cre8-wc": "https://cdn.jsdelivr.net/npm/@cre8_dev/cre8-wc",
+                "lit": "https://cdn.jsdelivr.net/npm/lit"
+            }
+        }
+    </script>
+    <script type="module">
+        import "@cre8_dev/cre8-wc";
+        import { html, unsafeCss, css, LitElement } from "lit"; 
+        </script>
 </head>
 <body>
     <div id="app">

@@ -123,6 +123,14 @@ export class DesignSystemTools {
             }
           }
         }
+      },
+      {
+        name: 'get_template',
+        description: 'Get the HTML template for building UIs with the design system',
+        input_schema: {
+          type: "object" as const,
+          properties: {}
+        }
       }
     ];
   }
@@ -152,6 +160,9 @@ export class DesignSystemTools {
         
       case 'get_design_tokens':
         return await this.designSystemHTTP.getDesignTokens(args.category);
+        
+      case 'get_template':
+        return await this.designSystemHTTP.getTemplate();
         
       default:
         throw new Error(`Unknown tool: ${toolName}`);
@@ -194,6 +205,12 @@ export class DesignSystemTools {
           }
           
           return output;
+        }
+        return JSON.stringify(result);
+        
+      case 'get_template':
+        if (typeof result === 'string') {
+          return `## HTML Template\n\n\`\`\`html\n${result}\n\`\`\`\n`;
         }
         return JSON.stringify(result);
         

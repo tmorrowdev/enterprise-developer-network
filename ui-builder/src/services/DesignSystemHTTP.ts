@@ -183,6 +183,61 @@ export class DesignSystemHTTP {
     }
   }
 
+  async getTemplate(): Promise<string> {
+    try {
+      const result = await this.callMCPTool('get_template');
+      const text = result.content?.[0]?.text || result.content || result.text || '';
+      return text;
+    } catch (error) {
+      console.error('Error getting template:', error);
+      // Return a fallback template if MCP call fails
+      return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title></title>
+  <script type="importmap">
+    {
+      "imports": {
+        "@cre8_dev/cre8-wc": "https://esm.sh/npm/@cre8_dev/cre8-wc",
+        "lit": "https://cdn.jsdelivr.net/npm/lit@latest"
+      }
+    }
+  </script>
+  <script type="module">
+    import '@cre8_dev/cre8-wc';
+    import { html, unsafeCss, css, LitElement } from 'lit';
+
+    const customCss = unsafeCss(css\`
+      <-- custom css here -->
+    \`);
+
+    class GeneratedInterface extends LitElement {
+      static styles = [customCss];
+
+      constructor() {
+        super();
+      }
+
+      render() {
+        return html\`
+          <!-- Generated Code here -->
+          <cre8-button text="Click Me"></cre8-button>
+        \`;
+      }
+    }
+
+    customElements.define('generated-interface', GeneratedInterface);
+  </script>
+</head>
+<body>
+  <generated-interface></generated-interface>
+</body>
+</html>`;
+    }
+  }
+
   // Helper methods
   private tagNameToComponentName(tagName: string): string {
     return tagName.replace('cre8-', '').split('-').map(word => 

@@ -171,6 +171,16 @@ app.get('/mcp/design-system/get_design_tokens', async (req, res) => {
   }
 });
 
+app.get('/mcp/design-system/get_template', async (req, res) => {
+  try {
+    const result = await callMCPServer('design-system', 'get_template', {});
+    res.json(result);
+  } catch (error) {
+    console.error('Error calling get_template:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Generic MCP endpoint for design system tools
 app.post('/mcp/design-system/:tool', async (req, res) => {
   try {
@@ -194,7 +204,8 @@ app.get('/health', (req, res) => {
       'GET /mcp/design-system/get_component_examples?name=<component>',
       'GET /mcp/design-system/validate_usage?component=<component>&props=<json>',
       'GET /mcp/design-system/generate_component_code?component=<component>',
-      'GET /mcp/design-system/get_design_tokens?category=<category>'
+      'GET /mcp/design-system/get_design_tokens?category=<category>',
+      'GET /mcp/design-system/get_template'
     ]
   });
 });

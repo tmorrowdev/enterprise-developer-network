@@ -44,7 +44,7 @@ const handler: Handler = async (event, context) => {
     const uiBuilder = new UIBuilderAgent(designSystemHTTP);
 
     // Generate UI
-    const result = await uiBuilder.generateUI(prompt, framework);
+    const result = await uiBuilder.generateUI(`/spec_to_dev ${prompt}`, 'html');
 
     return {
       statusCode: 200,

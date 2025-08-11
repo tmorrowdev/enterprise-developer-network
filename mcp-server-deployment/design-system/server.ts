@@ -646,6 +646,14 @@ class DesignSystemServer {
             },
             required: ['component']
           }
+        },
+        {
+          name: 'get_template',
+          description: 'Get the HTML template for building UIs with the design system',
+          inputSchema: {
+            type: 'object',
+            properties: {}
+          }
         }
       ]
     }));
@@ -664,6 +672,8 @@ class DesignSystemServer {
           return this.validateUsage(request.params.arguments);
         case 'generate_component_code':
           return this.generateComponentCode(request.params.arguments);
+        case 'get_template':
+          return this.generateUI(request.params.arguments);
         default:
           throw new Error(`Unknown tool: ${request.params.name}`);
       }
@@ -880,6 +890,37 @@ class DesignSystemServer {
         text: `\`\`\`html\n${code}\n\`\`\``
       }]
     };
+  }
+
+  private async generateUI(args: any) {
+    try {
+      const templatePath = path.join(process.cwd(), './example.html');
+      
+      if (!fs.existsSync(templatePath)) {
+        return {
+          content: [{
+            type: 'text',
+            text: 'Template file not found at ../../ui-builder/.claude/example/example.html'
+          }]
+        };
+      }
+
+      const templateContent = fs.readFileSync(templatePath, 'utf-8');
+      
+      return {
+        content: [{
+          type: 'text',
+          text: templateContent
+        }]
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Error reading template file: ${error instanceof Error ? error.message : 'Unknown error'}`
+        }]
+      };
+    }
   }
 
   private formatComponentDocumentation(component: Component): string {

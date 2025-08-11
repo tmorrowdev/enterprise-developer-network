@@ -14,7 +14,8 @@
         "get_component_examples",
         "validate_usage",
         "generate_component_code",
-        "get_design_tokens"
+        "get_design_tokens",
+        "generate_ui"
       ],
       "description": "Local MCP server for development with cre8-wc design system"
     },

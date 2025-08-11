@@ -15,6 +15,7 @@ RUN npm install
 COPY design-system/ ./design-system/
 COPY http-wrapper.js ./
 COPY cre8-wc-components.md ./
+COPY example.html ./
 COPY tsconfig.json ./
 
 # Build the MCP servers
