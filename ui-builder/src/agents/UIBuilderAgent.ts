@@ -96,6 +96,7 @@ export class UIBuilderAgent {
   private designSystemTools: DesignSystemTools;
   private conversations: Map<string, ConversationEntry> = new Map();
   private anthropic: Anthropic;
+  private componentLibraryCache: string | null = null;
 
   constructor(designSystemHTTP: DesignSystemHTTP) {
     this.designSystemHTTP = designSystemHTTP;
@@ -109,12 +110,163 @@ export class UIBuilderAgent {
     // Initialize Anthropic client with extended timeout
     this.anthropic = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
-      timeout: 120000, // 2 minutes timeout
+      timeout: 300000, // 5 minutes timeout
       maxRetries: 3
     });
   }
 
+  private async getRelevantComponents(prompt: string, availableComponents: any[]): Promise<string> {
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
+      
+      const componentFilePath = path.join(process.cwd(), '..', 'mcp-server-deployment', 'cre8-wc-components.md');
+      const fullLibrary = fs.readFileSync(componentFilePath, 'utf8');
+      
+      // Start with full component list from MCP
+      let result = 'AVAILABLE CRE8 WEB COMPONENTS:\n\n';
+      availableComponents.forEach(comp => {
+        result += `- ${comp.tagName}: ${comp.description}\n`;
+      });
+      
+      // Identify likely components needed based on prompt keywords
+      const neededComponents = this.identifyNeededComponents(prompt);
+      
+      // Search for specific component documentation for the most relevant ones
+      result += '\n\nDETAILED DOCUMENTATION FOR RELEVANT COMPONENTS:\n\n';
+      
+      for (const componentName of neededComponents.slice(0, 5)) { // Limit to 5 most relevant
+        const componentDoc = this.extractComponentDocumentation(fullLibrary, componentName);
+        if (componentDoc) {
+          result += componentDoc + '\n\n';
+        }
+      }
+      
+      // Add basic usage patterns
+      result += this.getBasicUsagePatterns();
+      
+      return result;
+    } catch (error) {
+      console.error('Failed to load component library:', error);
+      // Fallback to just the MCP component list
+      let result = 'AVAILABLE CRE8 WEB COMPONENTS:\n\n';
+      availableComponents.forEach(comp => {
+        result += `- ${comp.tagName}: ${comp.description}\n`;
+      });
+      return result + '\n\n' + this.getBasicUsagePatterns();
+    }
+  }
 
+  private identifyNeededComponents(prompt: string): string[] {
+    const prompt_lower = prompt.toLowerCase();
+    const components = new Set<string>();
+    
+    // Map keywords to component names
+    const keywordMap: { [key: string]: string[] } = {
+      'button': ['button'],
+      'click': ['button'],
+      'submit': ['button'],
+      'form': ['field', 'button'],
+      'input': ['field'],
+      'email': ['field'],
+      'text': ['field'],
+      'password': ['field'],
+      'card': ['card'],
+      'container': ['card'],
+      'box': ['card'],
+      'alert': ['alert'],
+      'message': ['alert'],
+      'notification': ['alert'],
+      'error': ['alert'],
+      'success': ['alert'],
+      'warning': ['alert'],
+      'modal': ['modal'],
+      'dialog': ['modal'],
+      'popup': ['modal'],
+      'overlay': ['modal'],
+      'tab': ['tabs'],
+      'navigation': ['tabs', 'dropdown'],
+      'menu': ['dropdown'],
+      'dropdown': ['dropdown'],
+      'select': ['dropdown', 'select'],
+      'icon': ['icon'],
+      'badge': ['badge'],
+      'status': ['badge'],
+      'tag': ['badge'],
+      'loading': ['loading-spinner'],
+      'spinner': ['loading-spinner'],
+      'table': ['table'],
+      'list': ['list'],
+      'grid': ['grid'],
+      'layout': ['layout', 'grid']
+    };
+    
+    // Check for keywords in prompt
+    for (const [keyword, componentNames] of Object.entries(keywordMap)) {
+      if (prompt_lower.includes(keyword)) {
+        componentNames.forEach(comp => components.add(comp));
+      }
+    }
+    
+    // Always include common components
+    components.add('button');
+    components.add('card');
+    
+    return Array.from(components);
+  }
+
+  private extractComponentDocumentation(fullLibrary: string, componentName: string): string | null {
+    // Search for component section in markdown
+    const sectionPattern = new RegExp(`## ${componentName}([\\s\\S]*?)(?=## |$)`, 'i');
+    const match = fullLibrary.match(sectionPattern);
+    
+    if (match) {
+      const section = match[1].trim();
+      // Extract just the properties table and basic info, skip verbose descriptions
+      const propsMatch = section.match(/### Properties([\s\S]*?)(?=### |---|$)/);
+      
+      let result = `cre8-${componentName}:\n`;
+      
+      if (propsMatch) {
+        const propsTable = propsMatch[1];
+        // Extract property names and types from table
+        const propRows = propsTable.match(/\| `([^`]+)` \| ([^|]+) \| ([^|]+) \|/g);
+        
+        if (propRows) {
+          result += 'Properties:\n';
+          propRows.slice(0, 8).forEach(row => { // Limit to 8 props to save tokens
+            const propMatch = row.match(/\| `([^`]+)` \| ([^|]+) \| ([^|]+) \|/);
+            if (propMatch) {
+              const [, name, type, desc] = propMatch;
+              result += `  - ${name}: ${type.trim()} - ${desc.trim().substring(0, 80)}...\n`;
+            }
+          });
+        }
+      }
+      
+      return result;
+    }
+    
+    return null;
+  }
+
+  private getBasicUsagePatterns(): string {
+    return `USAGE PATTERNS:
+- All components use kebab-case: <cre8-button>, <cre8-card>, <cre8-field>
+- Common props: variant, size, disabled, text, href
+- Common slots: header, body, footer (for cards, modals)
+- Button variants: primary, secondary, tertiary
+- Sizes: sm, md, lg
+- Use kebab-case attributes: full-width="true", not fullWidth="true"
+
+EXAMPLES:
+<cre8-button text="Click Me" variant="primary"></cre8-button>
+<cre8-card>
+  <div slot="header">Title</div>
+  <div slot="body">Content</div>
+</cre8-card>
+<cre8-field label="Email" type="email" required="true"></cre8-field>`;
+  }
 
   async generateUI(
     prompt: string,
@@ -129,20 +281,20 @@ export class UIBuilderAgent {
         progressCallback({ stage: 'analyzing', message: 'Analyzing UI requirements...' });
       }
 
-      // Step 2: Get relevant design system components
+      // Step 2: Get component list from MCP and relevant details from markdown
       if (progressCallback) {
-        progressCallback({ stage: 'components', message: 'Fetching design system components...' });
+        progressCallback({ stage: 'components', message: 'Fetching component list...' });
       }
 
       const availableComponents = await this.designSystemHTTP.listComponents();
-      const componentContext = this.buildComponentContext(availableComponents);
+      const componentLibrary = await this.getRelevantComponents(prompt, availableComponents);
 
       // Step 3: Generate UI code
       if (progressCallback) {
         progressCallback({ stage: 'generating', message: 'Generating UI code...' });
       }
 
-      const systemPrompt = await this.buildSystemPrompt(framework, componentContext);
+      const systemPrompt = await this.buildSystemPrompt(framework, componentLibrary);
       const userPrompt = this.buildUserPrompt(prompt, framework);
 
       // Generate UI using Anthropic SDK
@@ -208,9 +360,8 @@ export class UIBuilderAgent {
       }
 
       const availableComponents = await this.designSystemHTTP.listComponents();
-      const componentContext = this.buildComponentContext(availableComponents);
-
-      const systemPrompt = await this.buildRefinementSystemPrompt(framework, componentContext);
+      const componentLibrary = await this.getRelevantComponents(feedback, availableComponents);
+      const systemPrompt = await this.buildRefinementSystemPrompt(framework, componentLibrary);
       const userPrompt = this.buildRefinementUserPrompt(code, feedback, framework);
 
       if (progressCallback) {
@@ -255,13 +406,11 @@ export class UIBuilderAgent {
     prompt: string,
     systemPrompt: string
   ): Promise<string> {
-    const tools = this.designSystemTools.getToolDefinitions();
-    
+    // No tools needed - all component info is embedded in system prompt
     const response = await this.anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 8000, // Increased for longer HTML templates
+      max_tokens: 8000,
       system: systemPrompt,
-      tools: tools,
       messages: [
         {
           role: 'user',
@@ -270,30 +419,15 @@ export class UIBuilderAgent {
       ]
     });
 
-    // Handle tool calls if present
-    if (response.content.some(content => content.type === 'tool_use')) {
-      return await this.handleToolCalls(response, prompt, systemPrompt);
-    }
-
     const content = response.content[0];
     return content.type === 'text' ? content.text : '';
   }
 
   private async handleToolCalls(response: any, originalPrompt: string, systemPrompt: string, depth: number = 0): Promise<string> {
-    // Prevent infinite recursion by limiting depth to 3 callbacks
-    const MAX_RECURSION_DEPTH = 3;
-    if (depth >= MAX_RECURSION_DEPTH) {
-      console.warn(`Maximum recursion depth (${MAX_RECURSION_DEPTH}) reached in handleToolCalls. Extracting final text response.`);
-      const finalContent = response.content.find((content: any) => content.type === 'text');
-      
-      // If we have text content, return it; otherwise try to generate a basic template
-      if (finalContent && finalContent.text && !finalContent.text.includes('tool_use')) {
-        return finalContent.text;
-      }
-      
-      // As fallback, generate a basic template with the user's request
-      console.log('Generating fallback template due to recursion limit');
-      return this.generateFallbackTemplate();
+    // Add delay between recursive calls to prevent gateway timeouts
+    if (depth > 0) {
+      const delay = Math.min(1000 * Math.pow(1.5, depth - 1), 5000);
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
     console.log(`🔄 HandleToolCalls depth ${depth} - Processing ${response.content.filter((c: any) => c.type === 'tool_use').length} tool calls`);
     
@@ -302,39 +436,58 @@ export class UIBuilderAgent {
       { role: 'assistant', content: response.content }
     ];
 
-    // Process each tool call
-    for (const content of response.content) {
-      if (content.type === 'tool_use') {
+    // Batch process all tool calls in parallel for speed
+    const toolCalls = response.content.filter((content: any) => content.type === 'tool_use');
+    const toolResults = await Promise.allSettled(
+      toolCalls.map(async (content: any) => {
         try {
           const toolResult = await this.designSystemTools.handleToolCall(content.name, content.input);
           const formattedResult = this.designSystemTools.formatToolResult(content.name, toolResult);
-          
-          messages.push({
-            role: 'user',
-            content: [
-              {
-                type: 'tool_result',
-                tool_use_id: content.id,
-                content: formattedResult
-              }
-            ]
-          });
+          return {
+            tool_use_id: content.id,
+            content: formattedResult,
+            success: true
+          };
         } catch (error) {
           console.error(`Error executing tool ${content.name}:`, error);
-          messages.push({
-            role: 'user',
-            content: [
-              {
-                type: 'tool_result',
-                tool_use_id: content.id,
-                content: `Error: ${(error as Error).message}`,
-                is_error: true
-              }
-            ]
-          });
+          return {
+            tool_use_id: content.id,
+            content: `Error: ${(error as Error).message}`,
+            success: false
+          };
         }
+      })
+    );
+
+    // Add all tool results to messages
+    toolResults.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        messages.push({
+          role: 'user',
+          content: [
+            {
+              type: 'tool_result',
+              tool_use_id: result.value.tool_use_id,
+              content: result.value.content,
+              is_error: !result.value.success
+            }
+          ]
+        });
+      } else {
+        const toolCall = toolCalls[index];
+        messages.push({
+          role: 'user',
+          content: [
+            {
+              type: 'tool_result',
+              tool_use_id: toolCall.id,
+              content: `Tool execution failed: ${result.reason}`,
+              is_error: true
+            }
+          ]
+        });
       }
-    }
+    });
 
     // Get final response from Claude with tool results
     const finalResponse = await this.anthropic.messages.create({
@@ -373,11 +526,7 @@ export class UIBuilderAgent {
   }
 
   private async loadExampleTemplate(): Promise<string> {
-    try {
-      // Get template from MCP server instead of local file
-      return await this.designSystemHTTP.getTemplate();
-    } catch (error) {
-      console.error('Error loading template from MCP server:', error);
+   
       // Fallback to a basic template if MCP call fails
       return `<!DOCTYPE html>
 <html lang="en">
@@ -388,12 +537,14 @@ export class UIBuilderAgent {
   <script type="importmap">
       {
         "imports": {
-          "@cre8_dev/cre8-wc": "https://esm.sh/npm/@cre8_dev/cre8-wc",
-          "lit": "https://esm.sh/npm/lit@latest"
+           "@cre8_dev/cre8-wc": 'https://cdn.jsdelivr.net/npm/@cre8_dev/cre8-wc@1.0.5',
+         "lit": "https://cdn.jsdelivr.net/npm/lit@latest",
+          "@lit/reactive-element": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@latest",
+          "lit-html": "https://cdn.jsdelivr.net/npm/lit-html@latest"
         }
       }
     </script>
-  <script type="module" lang="ts">
+  <script type="module">
     import '@cre8_dev/cre8-wc';
     import { html, unsafeCss, css, LitElement } from 'lit';
 
@@ -422,43 +573,27 @@ export class UIBuilderAgent {
   <generated-interface></generated-interface>
 </body>
 </html>`;
-    }
   }
 
-  private async buildSystemPrompt(framework: string, componentContext: string): Promise<string> {
-    const usagePatterns = await this.buildComponentUsagePatterns();
+  private async buildSystemPrompt(framework: string, componentLibrary: string): Promise<string> {
     const exampleTemplate = await this.loadExampleTemplate();
 
     return `You are an expert Lit web component developer specializing in creating accessible, responsive web interfaces using the Cre8 Web Components library (@cre8_dev/cre8-wc). 
 
-AVAILABLE MCP TOOLS - USE THESE ACTIVELY:
-You have access to the following tools to get real-time information about the design system:
+COMPLETE COMPONENT LIBRARY DOCUMENTATION:
+${componentLibrary}
 
-1. **list_components** - ALWAYS call this first to see all available components
-2. **get_component_examples** - Use this to get specific usage examples for components you want to use
-3. **get_component** - Get detailed documentation for specific components
-4. **generate_component_code** - Generate properly formatted component code
-5. **validate_usage** - Validate your component usage before finalizing
-6. **get_design_tokens** - Get design system tokens for styling
-
-IMPORTANT: ALWAYS use these tools to get current component information. The static context below may be outdated.
-
-WORKFLOW (Use tools efficiently):
-1. For SIMPLE requests (1-2 components): Use existing component knowledge, minimal tool calls
-2. For COMPLEX UIs: Prefer cre8-wc components, supplement with native HTML + design tokens
-3. Call list_components and get_component_examples only when needed
-4. NEVER call validate_usage unless there's a specific error
+COMPONENT USAGE INSTRUCTIONS:
+1. All components use the "cre8-" prefix (e.g., cre8-button, cre8-card, cre8-field)
+2. Components support props/attributes as documented in the library above
+3. Many components use slots for content organization (header, body, footer)
+4. Always follow the property types and options specified in the documentation
+5. Use kebab-case for attribute names in HTML (e.g., full-width, not fullWidth)
 
 COMPONENT PRIORITY:
-1. First choice: Use cre8-wc components when available
+1. First choice: Use cre8-wc components when available (as documented above)
 2. Second choice: Native HTML with design tokens for layouts and complex structures
 3. Always apply design system styling via CSS custom properties
-
-DESIGN SYSTEM CONTEXT:
-${componentContext}
-
-COMPONENT USAGE PATTERNS:
-${usagePatterns}
 
 CRITICAL TEMPLATE REQUIREMENTS - FOLLOW THIS STRUCTURE EXACTLY:
 
@@ -495,47 +630,31 @@ CRITICAL: Limit tool usage to essential operations only. After gathering the nec
 
 ${prompt}
 
-STEP 1: ASSESS AND PLAN
-- For simple UIs: Use cre8-wc components directly with minimal tool calls
-- For complex UIs: Use tools to discover components, then mix cre8-wc with native HTML
-
-STEP 2: GET COMPONENTS (if needed)
-Only call tools for complex UIs or unfamiliar components.
-
-STEP 3: GENERATE UI
-Create the HTML following the exact template structure provided in the system prompt.
-
 CRITICAL REQUIREMENTS:
-- PREFER cre8-wc components when available 
-- SUPPLEMENT with native HTML + design tokens for complex layouts
-- Follow the exact Lit web component template structure
+- Use cre8-wc components from the library documentation provided in the system prompt
+- All component information is available in the system prompt - no additional lookups needed
+- Follow the exact Lit web component template structure provided
 - REPLACE ONLY the comment "/* please insert the HTML template here */" with your components
 - DO NOT rewrite the render() method - keep it exactly as shown in template
 - Use the customCss variable with design tokens for styling
 - Make it responsive and accessible
 - The custom element MUST be named 'generated-interface'
+- Use kebab-case for all attributes (e.g., full-width="true", not fullWidth="true")
 
-STEP 4: VALIDATE (Optional)
-Use validate_usage to check your component usage if needed.
+COMPONENT SELECTION:
+- Prefer cre8-wc components when available (all documented in system prompt)
+- Supplement with native HTML + design tokens for complex layouts
+- Reference the complete component library documentation provided above
 
-STEP 5: GENERATE FINAL OUTPUT
-After using the tools to gather component information, generate the complete HTML document following the mandatory template structure exactly. 
-
-CRITICAL: Replace ONLY the placeholder comment in the render method, not the entire method structure.
-
-IMPORTANT: Your final response must be the complete HTML document, not tool results or explanations. Output only the HTML code in the exact template structure provided in the system prompt.`;
+FINAL OUTPUT:
+Generate the complete HTML document following the mandatory template structure exactly. Output only the HTML code in the exact template structure provided in the system prompt.`;
   }
 
-  private async buildRefinementSystemPrompt(framework: string, componentContext: string): Promise<string> {
-    const usagePatterns = await this.buildComponentUsagePatterns();
-
+  private async buildRefinementSystemPrompt(framework: string, componentLibrary: string): Promise<string> {
     return `You are refining an existing Lit web component HTML page that uses cre8-wc components based on user feedback. 
 
-DESIGN SYSTEM CONTEXT:
-${componentContext}
-
-COMPONENT USAGE PATTERNS:
-${usagePatterns}
+COMPLETE COMPONENT LIBRARY DOCUMENTATION:
+${componentLibrary}
 
 CRITICAL: MAINTAIN THE EXACT TEMPLATE STRUCTURE:
 - Keep the importmap and module script structure
